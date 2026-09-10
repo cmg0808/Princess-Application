@@ -69,9 +69,8 @@ export interface Bubble {
   x: number; // %
   y: number; // %
   size: number;
-  color: string;
   speed: number;
-  type: 'regular' | 'crown' | 'carriage' | 'frog';
+  type: 'crown' | 'carriage' | 'frog' | 'wand' | 'castle';
   wobbleOffset: number;
 }
 

@@ -1,19 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { playSound } from '../utils/audio';
-import {
-  TeapotArt,
-  TeacupArt,
-  PlateArt,
-  CupcakeArt,
-  FlowerArt,
-  HeartShape,
-  TwinkleStar,
-  PrincessPortrait,
-  UnicornPortrait,
-  BunnyPortrait,
-  FrogPortrait,
-} from './GameArt';
+import { HeartShape, TwinkleStar } from './GameArt';
 
 interface TeaPartyGameProps {
   onReward: () => void;
@@ -22,17 +10,16 @@ interface TeaPartyGameProps {
 interface TeaPartyGuest {
   id: string;
   name: string;
-  Portrait: React.FC<{ className?: string }>;
-  cupFill: number; // 0 to 100%
+  portrait: string;
+  hasTea: boolean;
   hasCupcake: boolean;
   happyReaction: boolean;
 }
 
 const INITIAL_GUESTS: TeaPartyGuest[] = [
-  { id: 'princess-lily', name: 'Princess Lily', Portrait: PrincessPortrait, cupFill: 0, hasCupcake: false, happyReaction: false },
-  { id: 'sparkle-unicorn', name: 'Sparkle Unicorn', Portrait: UnicornPortrait, cupFill: 0, hasCupcake: false, happyReaction: false },
-  { id: 'twinkle-bunny', name: 'Twinkle Bunny', Portrait: BunnyPortrait, cupFill: 0, hasCupcake: false, happyReaction: false },
-  { id: 'pippin-frog', name: 'Prince Pippin', Portrait: FrogPortrait, cupFill: 0, hasCupcake: false, happyReaction: false },
+  { id: 'princess-lily', name: 'Princess Lily', portrait: '/art/guest-princess.png', hasTea: false, hasCupcake: false, happyReaction: false },
+  { id: 'twinkle-bunny', name: 'Twinkle Bunny', portrait: '/art/guest-bunny.png', hasTea: false, hasCupcake: false, happyReaction: false },
+  { id: 'pippin-frog', name: 'Prince Pippin', portrait: '/art/guest-frog.png', hasTea: false, hasCupcake: false, happyReaction: false },
 ];
 
 export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
@@ -41,7 +28,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
   const celebratedRef = useRef(false);
 
   const maybeCelebrate = (list: TeaPartyGuest[]) => {
-    const allFed = list.every((g) => g.cupFill >= 50 && g.hasCupcake);
+    const allFed = list.every((g) => g.hasTea && g.hasCupcake);
     if (allFed && !celebratedRef.current) {
       celebratedRef.current = true;
       playSound.fanfare();
@@ -55,9 +42,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
     setActivePouringId(guestId);
 
     setGuests((prev) => {
-      const next = prev.map((g) =>
-        g.id === guestId ? { ...g, cupFill: Math.min(100, g.cupFill + 50), happyReaction: true } : g
-      );
+      const next = prev.map((g) => (g.id === guestId ? { ...g, hasTea: true, happyReaction: true } : g));
       maybeCelebrate(next);
       return next;
     });
@@ -96,7 +81,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
     <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-3 select-none font-['Fredoka']">
       {/* Header */}
       <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs px-4 py-2.5 rounded-3xl border-2 border-pink-200 shadow-sm flex items-center gap-2">
-        <TeapotArt className="w-9 h-9 shrink-0" />
+        <img src="/art/teapot.png" alt="" className="w-10 h-10 shrink-0 object-contain" />
         <div>
           <h3 className="text-base sm:text-lg font-black text-pink-800 leading-tight">
             Royal Tea Party
@@ -113,19 +98,18 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
         <div className="absolute inset-x-8 bottom-4 h-40 bg-white/90 rounded-3xl border-3 border-pink-200 shadow-lg flex flex-col items-center justify-center pointer-events-none">
           <div className="w-full h-4 bg-pink-300/40" />
           <div className="flex items-center gap-4 my-auto opacity-70">
-            <FlowerArt className="w-6 h-6" color="#F472B6" />
-            <TeapotArt className="w-8 h-8" />
-            <CupcakeArt className="w-7 h-7" />
-            <FlowerArt className="w-6 h-6" color="#C084FC" />
+            <img src="/art/cookie-heart.png" alt="" className="w-7 h-7 object-contain" />
+            <img src="/art/teapot.png" alt="" className="w-9 h-9 object-contain" />
+            <img src="/art/cupcake.png" alt="" className="w-7 h-7 object-contain" />
+            <img src="/art/cookie-round.png" alt="" className="w-7 h-7 object-contain" />
           </div>
           <div className="w-full h-4 bg-pink-300/40" />
         </div>
 
         {/* Guests Seated Around Table */}
-        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-2 h-full items-center">
+        <div className="relative z-10 grid grid-cols-3 gap-2 h-full items-center">
           {guests.map((guest) => {
             const isPouring = activePouringId === guest.id;
-            const Portrait = guest.Portrait;
             return (
               <div
                 key={guest.id}
@@ -143,7 +127,11 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
 
                 {/* Guest Character Portrait */}
                 <div className="flex flex-col items-center">
-                  <Portrait className="w-14 h-14 sm:w-16 sm:h-16 filter drop-shadow select-none" />
+                  <img
+                    src={guest.portrait}
+                    alt={guest.name}
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain filter drop-shadow select-none"
+                  />
                   <span className="text-xs font-black text-pink-900 bg-white/90 px-2 py-0.5 rounded-full shadow-2xs border border-pink-200 mt-1">
                     {guest.name}
                   </span>
@@ -154,31 +142,40 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
                   <button
                     id={`btn-pour-${guest.id}`}
                     onClick={() => handlePourTea(guest.id)}
-                    className="w-11 h-11 cursor-pointer hover:scale-115 active:scale-90 transition-transform"
+                    className="w-12 h-12 cursor-pointer hover:scale-115 active:scale-90 transition-transform"
                     title="Tap to pour tea"
                     aria-label={`Pour tea for ${guest.name}`}
                   >
-                    <TeacupArt className="w-full h-full drop-shadow-xs" fillPercent={guest.cupFill} />
+                    <img
+                      src="/art/teacup.png"
+                      alt=""
+                      className={`w-full h-full object-contain transition-all duration-300 ${
+                        guest.hasTea ? 'opacity-100' : 'opacity-30 grayscale'
+                      }`}
+                    />
                   </button>
 
                   <button
                     id={`btn-feed-${guest.id}`}
                     onClick={() => handleFeedGuest(guest.id)}
-                    className="relative w-11 h-11 cursor-pointer hover:scale-115 active:scale-90 transition-transform"
+                    className="w-12 h-12 cursor-pointer hover:scale-115 active:scale-90 transition-transform"
                     title="Tap to give a cupcake"
                     aria-label={`Feed cupcake to ${guest.name}`}
                   >
-                    <PlateArt className="w-full h-full drop-shadow-xs" />
-                    {guest.hasCupcake && (
-                      <CupcakeArt className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-7 h-7 drop-shadow" />
-                    )}
+                    <img
+                      src="/art/cupcake.png"
+                      alt=""
+                      className={`w-full h-full object-contain transition-all duration-300 ${
+                        guest.hasCupcake ? 'opacity-100' : 'opacity-30 grayscale'
+                      }`}
+                    />
                   </button>
                 </div>
 
-                {/* Pouring Teapot Stream Animation */}
+                {/* Pouring Teapot Animation */}
                 {isPouring && (
                   <div className="absolute -top-5 right-0 animate-bounce z-30">
-                    <TeapotArt className="w-8 h-8" />
+                    <img src="/art/teapot.png" alt="" className="w-8 h-8 object-contain" />
                   </div>
                 )}
               </div>
@@ -188,7 +185,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
 
         {/* Hint at bottom */}
         <div className="relative z-10 self-center bg-white/85 backdrop-blur-xs px-3 py-1 rounded-full border border-pink-200 text-xs font-black text-pink-700 pointer-events-none">
-          Tap a teacup to pour, or tap a plate to feed treats!
+          Tap a teacup to pour, or tap a treat to feed it!
         </div>
       </div>
 
@@ -203,7 +200,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
           }}
           className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-linear-to-b from-amber-400 to-yellow-500 text-amber-950 font-black text-xs sm:text-sm shadow-md hover:scale-102 active:scale-95 transition cursor-pointer border-2 border-yellow-300"
         >
-          <TeapotArt className="w-6 h-6" />
+          <img src="/art/teapot.png" alt="" className="w-6 h-6 object-contain" />
           <span>Pour Tea for All!</span>
         </button>
 
@@ -216,7 +213,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
           }}
           className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-linear-to-b from-pink-400 to-rose-500 text-white font-black text-xs sm:text-sm shadow-md hover:scale-102 active:scale-95 transition cursor-pointer border-2 border-pink-300"
         >
-          <CupcakeArt className="w-6 h-6" />
+          <img src="/art/cupcake.png" alt="" className="w-6 h-6 object-contain" />
           <span>Feed Cupcakes!</span>
         </button>
 

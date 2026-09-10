@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bubble } from '../types';
 import { playSound } from '../utils/audio';
-import { CrownArt, CarriageArt, FrogArt, TwinkleStar, DropletArt } from './GameArt';
+import { DropletArt } from './GameArt';
 
 interface BubblePopGameProps {
   onReward: () => void;
@@ -11,15 +11,28 @@ interface Particle {
   id: number;
   x: number;
   y: number;
-  type: Bubble['type'];
+  src: string;
 }
 
-const BUBBLE_ICON: Record<Bubble['type'], React.FC<{ className?: string }>> = {
-  crown: CrownArt,
-  carriage: CarriageArt,
-  frog: FrogArt,
-  regular: TwinkleStar,
+// Every bubble carries one of these ready-illustrated "surprise inside a
+// bubble" pictures — carriages, crowns, a frog prince, a magic wand and a
+// fairytale castle, all floating up for a toddler to pop.
+const BUBBLE_SRC: Record<Bubble['type'], string> = {
+  crown: '/art/bubble-crown.png',
+  carriage: '/art/bubble-carriage.png',
+  frog: '/art/bubble-frog.png',
+  wand: '/art/bubble-wand.png',
+  castle: '/art/bubble-castle.png',
 };
+
+const SPARKLE_BURSTS = [
+  '/art/sparkle-burst-pink.png',
+  '/art/sparkle-burst-yellow.png',
+  '/art/sparkle-burst-blue.png',
+  '/art/sparkle-burst-purple.png',
+];
+
+const BUBBLE_TYPES: Bubble['type'][] = ['crown', 'carriage', 'frog', 'wand', 'castle'];
 
 export const BubblePopGame: React.FC<BubblePopGameProps> = ({ onReward }) => {
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
@@ -35,26 +48,15 @@ export const BubblePopGame: React.FC<BubblePopGameProps> = ({ onReward }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setBubbles((prev) => {
-        if (prev.length >= 14) return prev; // Keep reasonable density for toddlers
+        if (prev.length >= 12) return prev; // Keep reasonable density for toddlers
 
-        const types: ('regular' | 'crown' | 'carriage' | 'frog')[] = [
-          'regular',
-          'regular',
-          'regular',
-          'crown',
-          'carriage',
-          'frog',
-        ];
-        const chosenType = types[Math.floor(Math.random() * types.length)];
-        const colors = ['#F472B6', '#C084FC', '#38BDF8', '#FACC15', '#FB7185', '#34D399'];
-        const chosenColor = colors[Math.floor(Math.random() * colors.length)];
+        const chosenType = BUBBLE_TYPES[Math.floor(Math.random() * BUBBLE_TYPES.length)];
 
         const newBubble: Bubble = {
           id: nextIdRef.current++,
           x: 10 + Math.random() * 80, // 10% to 90%
           y: 105, // start just below bottom
-          size: Math.floor(65 + Math.random() * 45), // 65-110px (big touch targets!)
-          color: chosenColor,
+          size: Math.floor(70 + Math.random() * 45), // 70-115px (big touch targets!)
           speed: (speedMode === 'gentle' ? 0.35 : 0.6) + Math.random() * 0.25,
           type: chosenType,
           wobbleOffset: Math.random() * 10,
@@ -62,7 +64,7 @@ export const BubblePopGame: React.FC<BubblePopGameProps> = ({ onReward }) => {
 
         return [...prev, newBubble];
       });
-    }, 800);
+    }, 850);
 
     return () => clearInterval(interval);
   }, [speedMode]);
@@ -93,22 +95,23 @@ export const BubblePopGame: React.FC<BubblePopGameProps> = ({ onReward }) => {
     e.stopPropagation();
 
     playSound.pop();
-    if (bubble.type === 'crown' || bubble.type === 'carriage') {
+    if (bubble.type === 'crown' || bubble.type === 'carriage' || bubble.type === 'castle') {
       playSound.sparkle();
     } else if (bubble.type === 'frog') {
       playSound.ribbit();
+    } else {
+      playSound.wandChime(0);
     }
 
-    // Spawn popping sparkles
+    // Spawn a popping sparkle burst
     const newParticles: Particle[] = [
-      { id: Math.random(), x: bubble.x, y: bubble.y, type: bubble.type },
-      { id: Math.random(), x: bubble.x + 4, y: bubble.y - 2, type: 'regular' },
+      { id: Math.random(), x: bubble.x, y: bubble.y, src: SPARKLE_BURSTS[Math.floor(Math.random() * SPARKLE_BURSTS.length)] },
     ];
     setParticles((prev) => [...prev, ...newParticles]);
 
     setTimeout(() => {
       setParticles((prev) => prev.filter((p) => !newParticles.find((np) => np.id === p.id)));
-    }, 700);
+    }, 500);
 
     // Remove popped bubble
     setBubbles((prev) => prev.filter((b) => b.id !== bubble.id));
@@ -167,7 +170,7 @@ export const BubblePopGame: React.FC<BubblePopGameProps> = ({ onReward }) => {
         id="bubble-container"
         className="relative w-full max-w-lg h-[460px] sm:h-[520px] rounded-3xl border-4 border-pink-300 shadow-xl overflow-hidden touch-none cursor-pointer bg-linear-to-b from-sky-200 via-pink-100 to-purple-200"
       >
-        {/* Dreamy soft background blobs (no literal artwork needed back here) */}
+        {/* Dreamy soft background blobs */}
         <div className="absolute inset-0 pointer-events-none opacity-40">
           <div className="absolute -top-4 -left-4 w-24 h-24 rounded-full blur-md bg-white" />
           <div className="absolute top-10 -right-6 w-20 h-20 rounded-full blur-md bg-[#FDE68A]" />
@@ -178,50 +181,40 @@ export const BubblePopGame: React.FC<BubblePopGameProps> = ({ onReward }) => {
         {/* Floating Bubbles */}
         {bubbles.map((bubble) => {
           const wobble = Math.sin(bubble.wobbleOffset) * 8;
-          const Icon = BUBBLE_ICON[bubble.type];
 
           return (
-            <div
+            <button
               key={bubble.id}
               id={`bubble-${bubble.id}`}
               onPointerDown={(e) => popBubble(bubble, e)}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 rounded-full cursor-pointer flex items-center justify-center transition-transform hover:scale-110 active:scale-90"
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform hover:scale-110 active:scale-90"
               style={{
                 left: `calc(${bubble.x}% + ${wobble}px)`,
                 top: `${bubble.y}%`,
                 width: `${bubble.size}px`,
                 height: `${bubble.size}px`,
-                background: `radial-gradient(circle at 30% 30%, #FFFFFF, ${bubble.color} 50%, rgba(255,255,255,0.2) 100%)`,
-                boxShadow: `inset 0 0 15px rgba(255,255,255,0.8), 0 4px 12px ${bubble.color}66`,
-                border: '2px solid rgba(255, 255, 255, 0.7)',
               }}
             >
-              {/* Bubble Sheen Highlight */}
-              <div className="absolute top-2 left-3 w-4 h-3 rounded-full bg-white/80 transform -rotate-45" />
-
-              {/* Center icon / Surprise */}
-              <Icon
-                className={`w-1/2 h-1/2 filter drop-shadow select-none ${
-                  bubble.type === 'crown' ? 'animate-pulse' : bubble.type === 'frog' ? 'animate-bounce' : ''
-                } ${bubble.type === 'regular' ? 'opacity-75 w-1/3 h-1/3' : ''}`}
+              <img
+                src={BUBBLE_SRC[bubble.type]}
+                alt=""
+                className="w-full h-full object-contain filter drop-shadow select-none"
+                draggable={false}
               />
-            </div>
+            </button>
           );
         })}
 
         {/* Pop Particle Sparkles */}
-        {particles.map((p) => {
-          const Icon = BUBBLE_ICON[p.type];
-          return (
-            <div
-              key={p.id}
-              className="absolute pointer-events-none transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 animate-ping"
-              style={{ left: `${p.x}%`, top: `${p.y}%` }}
-            >
-              <Icon className="w-full h-full" />
-            </div>
-          );
-        })}
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className="absolute pointer-events-none transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 animate-ping"
+            style={{ left: `${p.x}%`, top: `${p.y}%` }}
+          >
+            <img src={p.src} alt="" className="w-full h-full object-contain" />
+          </div>
+        ))}
 
         {/* Prompt at bottom if no bubbles popped yet */}
         {poppedCount === 0 && (

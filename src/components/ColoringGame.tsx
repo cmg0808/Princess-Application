@@ -6,7 +6,7 @@ import { SavedColoringArtwork } from '../types';
 import { saveColoringArtwork } from '../utils/storage';
 import { CartoonGalleryIcon } from './CartoonIcons';
 import { ColoringPreviewSvg } from './ColoringPreviewSvg';
-import { WandCursorArt, WandTipShape, TwinkleStar, drawSparkleOnCanvas } from './GameArt';
+import { TwinkleStar } from './GameArt';
 
 interface ColoringGameProps {
   onReward: () => void;
@@ -22,20 +22,14 @@ interface SparkleParticle {
   vy: number;
   life: number; // 0..1, counts down
   size: number;
-  hue: string;
+  imgIdx: number;
 }
 
-interface WandSkin {
-  id: string;
-  name: string;
-  tip: WandTipShape;
-  hue: string;
-}
-
-const WAND_SKINS: WandSkin[] = [
-  { id: 'star', name: 'Starlight', tip: 'star', hue: '#FACC15' },
-  { id: 'heart', name: 'Sweetheart', tip: 'heart', hue: '#F472B6' },
-  { id: 'rainbow', name: 'Rainbow', tip: 'rainbow', hue: '#9333EA' },
+const SPARKLE_IMAGE_SRCS = [
+  '/art/sparkle-burst-pink.png',
+  '/art/sparkle-burst-yellow.png',
+  '/art/sparkle-burst-blue.png',
+  '/art/sparkle-burst-purple.png',
 ];
 
 // A fully "solved" color map for a page, used for its small preview thumbnail.
@@ -58,7 +52,6 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
   const [pathColors, setPathColors] = useState<Record<string, string>>(
     initialArtwork?.pathColors || {}
   );
-  const [wandSkin, setWandSkin] = useState<WandSkin>(WAND_SKINS[0]);
   const [savedArtworkId, setSavedArtworkId] = useState<string | null>(initialArtwork?.id || null);
   const [justSaved, setJustSaved] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -70,11 +63,21 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wandRef = useRef<HTMLDivElement | null>(null);
   const particlesRef = useRef<SparkleParticle[]>([]);
+  const sparkleImagesRef = useRef<HTMLImageElement[]>([]);
   const rafRef = useRef<number | null>(null);
   const revealedRef = useRef<Set<string>>(new Set(Object.keys(pathColors)));
   const revealCountRef = useRef<number>(0);
   const lastTrailAtRef = useRef<number>(0);
   const completedRef = useRef<boolean>(false);
+
+  // Preload the sparkle burst images once so canvas drawImage calls never stall.
+  useEffect(() => {
+    sparkleImagesRef.current = SPARKLE_IMAGE_SRCS.map((src) => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
+  }, []);
 
   // Load a fresh (or continued) page whenever the selected page changes.
   useEffect(() => {
@@ -133,10 +136,13 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
       const x = p.x + p.vx;
       const y = p.y + p.vy;
       const vy = p.vy + 0.05; // gentle gravity drift
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, life);
-      drawSparkleOnCanvas(ctx, x, y, p.size, p.hue);
-      ctx.restore();
+      const img = sparkleImagesRef.current[p.imgIdx];
+      if (img && img.complete && img.naturalWidth > 0) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, life);
+        ctx.drawImage(img, x - p.size / 2, y - p.size / 2, p.size, p.size);
+        ctx.restore();
+      }
       next.push({ ...p, x, y, vy, life });
     }
     particlesRef.current = next;
@@ -167,13 +173,13 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed - (burst ? 1 : 0.2),
           life: 1,
-          size: burst ? 14 + Math.random() * 12 : 8 + Math.random() * 8,
-          hue: wandSkin.hue,
+          size: burst ? 22 + Math.random() * 16 : 14 + Math.random() * 10,
+          imgIdx: Math.floor(Math.random() * SPARKLE_IMAGE_SRCS.length),
         });
       }
       ensureLoopRunning();
     },
-    [wandSkin, ensureLoopRunning]
+    [ensureLoopRunning]
   );
 
   const moveWandCursor = (x: number, y: number) => {
@@ -303,34 +309,13 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
         ))}
       </div>
 
-      {/* Header: progress + wand skin picker */}
-      <div className="flex items-center justify-between gap-2 flex-wrap">
+      {/* Header: progress */}
+      <div className="flex items-center justify-center">
         <div className="flex items-center gap-2 bg-white/90 border-2 border-amber-300 rounded-2xl px-3 py-1.5 font-black text-amber-900 text-sm shadow-xs">
           <TwinkleStar className="w-4 h-4" color="#F59E0B" />
           <span>
             {revealedCount}/{totalCount} colors found!
           </span>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          {WAND_SKINS.map((skin) => (
-            <button
-              key={skin.id}
-              onClick={() => {
-                playSound.tap();
-                setWandSkin(skin);
-              }}
-              className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition active:scale-90 cursor-pointer ${
-                wandSkin.id === skin.id
-                  ? 'bg-white border-pink-400 shadow-md scale-110'
-                  : 'bg-white/70 border-[#E3D6FF]'
-              }`}
-              title={`${skin.name} Wand`}
-              aria-label={`${skin.name} Wand`}
-            >
-              <WandCursorArt tip={skin.tip} color={skin.hue} className="w-6 h-6" />
-            </button>
-          ))}
         </div>
       </div>
 
@@ -380,12 +365,17 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
         {/* Floating wand cursor */}
         <div
           ref={wandRef}
-          className={`absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-150 ${
+          className={`absolute top-0 left-0 -translate-x-1/4 -translate-y-full pointer-events-none transition-opacity duration-150 ${
             wandVisible ? 'opacity-100' : 'opacity-0'
-          } ${isDragging ? 'scale-110 rotate-12' : ''}`}
+          } ${isDragging ? 'scale-110 -rotate-12' : '-rotate-6'}`}
           style={{ willChange: 'transform' }}
         >
-          <WandCursorArt tip={wandSkin.tip} color={wandSkin.hue} className="w-12 h-12 drop-shadow-[0_4px_6px_rgba(0,0,0,0.25)]" />
+          <img
+            src="/art/wand-sparkle.png"
+            alt=""
+            className="w-16 h-16 object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,0.25)]"
+            draggable={false}
+          />
         </div>
 
         {/* Completion celebration overlay */}
