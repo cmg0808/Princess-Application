@@ -7,12 +7,7 @@ import { NavigationHeader } from './components/NavigationHeader';
 import { HomeScreen } from './components/HomeScreen';
 import { RewardModal } from './components/RewardModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
-import {
-  CartoonHomeIcon,
-  CartoonStickerStarIcon,
-  CartoonSoundIcon,
-  CartoonHeroCrown,
-} from './components/CartoonIcons';
+import { CartoonSoundIcon, CartoonHeroCrown } from './components/CartoonIcons';
 
 // Each game is a sizeable chunk of art/logic and only one is ever on screen
 // at a time, so they're code-split and fetched on demand instead of bloating
@@ -254,7 +249,7 @@ export default function App() {
                   className="w-[50px] h-[50px] rounded-[18px] bg-white/95 border-2 border-[#E3D6FF] hover:bg-[#FFD6E8] flex items-center justify-center text-[#6E5FA6] active:scale-95 transition cursor-pointer shadow-2xs"
                   title="Return to Playroom"
                 >
-                  <CartoonHomeIcon className="w-7 h-7" />
+                  <img src="/art/icon-home.png" alt="" className="w-8 h-8 object-contain" />
                 </button>
 
                 <button
@@ -270,7 +265,7 @@ export default function App() {
                   }`}
                   title="Stickers"
                 >
-                  <CartoonStickerStarIcon className="w-7 h-7" />
+                  <img src="/art/icon-star.png" alt="" className="w-7 h-7 object-contain" />
                 </button>
 
                 <button

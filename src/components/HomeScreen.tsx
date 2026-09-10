@@ -5,18 +5,11 @@ import { playSound } from '../utils/audio';
 import {
   CartoonBookIcon,
   CartoonMusicIcon,
-  CartoonPaletteIcon,
-  CartoonDressIcon,
-  CartoonTeacupIcon,
   CartoonPuzzleIcon,
-  CartoonPetSpaIcon,
   CartoonMagicWandIcon,
-  CartoonShapesIcon,
   CartoonBallIcon,
   CartoonCrownIcon,
-  CartoonBubblesIcon,
   CartoonStickerStarIcon,
-  CartoonHomeIcon,
   CartoonGiftIcon,
   CartoonSoundIcon,
   CartoonHeroCrown,
@@ -97,7 +90,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#FFF1C2]', // var(--butter)
       shapeClass: 'rounded-[40%_60%_55%_45%_/_60%_40%_60%_40%]',
       animDelay: '0.16s',
-      icon: <CartoonPaletteIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="/art/icon-coloring.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'dressup',
@@ -105,7 +98,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#E3D6FF]', // var(--lav)
       shapeClass: 'rounded-[60%_40%_45%_55%_/_55%_65%_35%_45%]',
       animDelay: '0.22s',
-      icon: <CartoonDressIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="/art/icon-dressup.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'teaparty',
@@ -113,7 +106,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#FFE3EF]', // soft cotton pink
       shapeClass: 'rounded-[45%_55%_65%_35%_/_40%_50%_50%_60%]',
       animDelay: '0.28s',
-      icon: <CartoonTeacupIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="/art/icon-teaparty.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'matching',
@@ -129,7 +122,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#D8F3FE]', // soft water pastel
       shapeClass: 'rounded-[50%_50%_40%_60%_/_60%_40%_60%_40%]',
       animDelay: '0.40s',
-      icon: <CartoonPetSpaIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="/art/icon-petshop.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'magicwand',
@@ -145,7 +138,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#FEF3D6]', // lemon cream
       shapeClass: 'rounded-[60%_40%_50%_50%_/_45%_55%_45%_55%]',
       animDelay: '0.52s',
-      icon: <CartoonShapesIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="/art/icon-shapes.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'royalball',
@@ -161,7 +154,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#FFE8DF]', // warm peach
       shapeClass: 'rounded-[52%_48%_60%_40%_/_40%_60%_40%_60%]',
       animDelay: '0.64s',
-      icon: <CartoonCrownIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="/art/icon-crown.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'bubblepop',
@@ -169,7 +162,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#E0F7FA]', // ice cyan
       shapeClass: 'rounded-[38%_62%_50%_50%_/_60%_40%_60%_40%]',
       animDelay: '0.70s',
-      icon: <CartoonBubblesIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="/art/icon-bubbles.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'stickers',
@@ -235,7 +228,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           className="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full border-2 border-yellow-300 text-sm sm:text-base font-['Baloo_2'] font-extrabold text-[#7A5B0B] hover:scale-105 active:scale-95 transition cursor-pointer shadow-[0_4px_16px_rgba(255,241,194,0.7)]"
           title="Tap to open surprise gift!"
         >
-          <CartoonStickerStarIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+          <img src="/art/icon-star.png" alt="" className="w-5 h-5 sm:w-6 sm:h-6 object-contain" draggable={false} />
           <span>{starsCount}</span>
           <span className="text-xs text-[#A67E14]">({unlockedStickerCount}/{totalStickerCount})</span>
         </button>
@@ -322,7 +315,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           title="Home"
           aria-label="Home"
         >
-          <CartoonHomeIcon className="w-7 h-7 sm:w-8 sm:h-8" />
+          <img src="/art/icon-home.png" alt="" className="w-8 h-8 sm:w-9 sm:h-9 object-contain" draggable={false} />
         </button>
 
         {/* Dock Item 2: Stickers / Favorites */}
@@ -336,7 +329,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           title="Stickers"
           aria-label="Stickers"
         >
-          <CartoonStickerStarIcon className="w-7 h-7 sm:w-8 sm:h-8" />
+          <img src="/art/icon-star.png" alt="" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" draggable={false} />
         </button>
 
         {/* Dock Item 3: Royal Surprise Present */}
