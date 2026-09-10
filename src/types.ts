@@ -71,7 +71,7 @@ export interface Bubble {
   size: number;
   color: string;
   speed: number;
-  type: 'regular' | 'star' | 'tiara' | 'heart';
+  type: 'regular' | 'crown' | 'carriage' | 'frog';
   wobbleOffset: number;
 }
 

@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Paintbrush, Stamp, RotateCcw, Download, Check, Palette, Image as ImageIcon, Heart, ArrowRight, X } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Sparkles, Image as ImageIcon, Wand2 } from 'lucide-react';
 import { playSound } from '../utils/audio';
 import { REAL_COLORING_PAGES, ColoringPage } from '../data/coloringPagesData';
 import { SavedColoringArtwork } from '../types';
 import { saveColoringArtwork } from '../utils/storage';
-import { ColoringPreviewSvg } from './ColoringPreviewSvg';
 import { CartoonGalleryIcon } from './CartoonIcons';
 
 interface ColoringGameProps {
@@ -13,537 +12,439 @@ interface ColoringGameProps {
   initialArtwork?: SavedColoringArtwork | null;
 }
 
-interface StampItem {
-  id: string;
-  emoji: string;
-  label: string;
+// A single magic sparkle drawn on the trail/reveal canvas.
+interface SparkleParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number; // 0..1, counts down
+  size: number;
+  glyph: string;
+  hue: string;
 }
 
-const STAMPS: StampItem[] = [
-  { id: 'star', emoji: '⭐', label: 'Star' },
-  { id: 'crown', emoji: '👑', label: 'Crown' },
-  { id: 'heart', emoji: '💖', label: 'Heart' },
-  { id: 'flower', emoji: '🌸', label: 'Flower' },
-  { id: 'butterfly', emoji: '🦋', label: 'Butterfly' },
-  { id: 'gem', emoji: '💎', label: 'Gem' },
-];
+interface WandSkin {
+  id: string;
+  name: string;
+  emoji: string;
+  glyphs: string[];
+  hue: string;
+}
 
-const PALETTE_COLORS = [
-  { name: 'Princess Pink', hex: '#F472B6' },
-  { name: 'Rose Red', hex: '#F43F5E' },
-  { name: 'Royal Purple', hex: '#C084FC' },
-  { name: 'Deep Lavender', hex: '#9333EA' },
-  { name: 'Sky Blue', hex: '#38BDF8' },
-  { name: 'Royal Blue', hex: '#2563EB' },
-  { name: 'Mint Green', hex: '#34D399' },
-  { name: 'Emerald', hex: '#059669' },
-  { name: 'Sunshine Gold', hex: '#FACC15' },
-  { name: 'Peach Coral', hex: '#FB923C' },
-  { name: 'Warm Cream', hex: '#FEF3C7' },
-  { name: 'Pure White', hex: '#FFFFFF' },
-  { name: 'Fairytale Glitter', hex: 'rainbow' },
+const WAND_SKINS: WandSkin[] = [
+  { id: 'star', name: 'Starlight', emoji: '🪄', glyphs: ['✨', '⭐', '💫'], hue: '#FACC15' },
+  { id: 'heart', name: 'Sweetheart', emoji: '💖', glyphs: ['💖', '✨', '💕'], hue: '#F472B6' },
+  { id: 'rainbow', name: 'Rainbow', emoji: '🌈', glyphs: ['✨', '🌈', '💫'], hue: '#9333EA' },
 ];
-
-const PASTEL_RAINBOW = ['#FDA4AF', '#FCD34D', '#86EFAC', '#93C5FD', '#D8B4FE', '#F472B6'];
 
 export const ColoringGame: React.FC<ColoringGameProps> = ({
   onReward,
   onOpenGallery,
   initialArtwork,
 }) => {
-  const [selectedPageIdx, setSelectedPageIdx] = useState(0);
-  const [activeColor, setActiveColor] = useState('#F472B6');
-  const [toolMode, setToolMode] = useState<'fill' | 'brush' | 'stamp'>('fill');
-  const [selectedStamp, setSelectedStamp] = useState('star');
-  const [brushSize, setBrushSize] = useState(16);
+  const initialPageIdx = initialArtwork
+    ? Math.max(0, REAL_COLORING_PAGES.findIndex((p) => p.id === initialArtwork.pageId))
+    : 0;
 
-  // Path colors for current page: { pathId: hex }
-  const [pathColors, setPathColors] = useState<Record<string, string>>({});
-  const [colorHistory, setColorHistory] = useState<Record<string, string>[]>([]);
-  const [colorCount, setColorCount] = useState(0);
-
-  // Stamped stickers on drawing
-  const [stamps, setStamps] = useState<{ id: string; emoji: string; x: number; y: number }[]>([]);
-
-  // Brush canvas overlay ref
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const isDrawingRef = useRef(false);
-
-  // Royal Gallery save state
+  const [selectedPageIdx, setSelectedPageIdx] = useState(initialPageIdx);
+  const [pathColors, setPathColors] = useState<Record<string, string>>(
+    initialArtwork?.pathColors || {}
+  );
+  const [wandSkin, setWandSkin] = useState<WandSkin>(WAND_SKINS[0]);
   const [savedArtworkId, setSavedArtworkId] = useState<string | null>(initialArtwork?.id || null);
-  const [showSavedModal, setShowSavedModal] = useState(false);
-  const [savedSuccessInfo, setSavedSuccessInfo] = useState<SavedColoringArtwork | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [wandVisible, setWandVisible] = useState(false);
 
-  const currentPage = REAL_COLORING_PAGES[selectedPageIdx] || REAL_COLORING_PAGES[0];
+  const currentPage: ColoringPage = REAL_COLORING_PAGES[selectedPageIdx];
 
-  // Load initial artwork if provided (from Royal Gallery "Color Again")
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const wandRef = useRef<HTMLDivElement | null>(null);
+  const particlesRef = useRef<SparkleParticle[]>([]);
+  const rafRef = useRef<number | null>(null);
+  const revealedRef = useRef<Set<string>>(new Set(Object.keys(pathColors)));
+  const revealCountRef = useRef<number>(0);
+  const lastTrailAtRef = useRef<number>(0);
+  const completedRef = useRef<boolean>(false);
+
+  // Load a fresh (or continued) page whenever the selected page changes.
   useEffect(() => {
-    if (initialArtwork) {
-      const idx = REAL_COLORING_PAGES.findIndex((p) => p.id === initialArtwork.pageId);
-      if (idx >= 0) {
-        setSelectedPageIdx(idx);
-      }
-      setPathColors(initialArtwork.pathColors || {});
-      setStamps(initialArtwork.stamps || []);
-      setSavedArtworkId(initialArtwork.id);
-
-      if (initialArtwork.brushDataUrl) {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = canvasRef.current;
-          if (canvas) {
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              ctx.drawImage(img, 0, 0);
-            }
-          }
-        };
-        img.src = initialArtwork.brushDataUrl;
-      }
-    }
-  }, [initialArtwork]);
-
-  // Reset colors when page changes manually (unless loading initial artwork)
-  useEffect(() => {
-    if (initialArtwork && initialArtwork.pageId === currentPage.id) {
-      return;
-    }
-    setPathColors({});
-    setColorHistory([]);
-    setStamps([]);
-    clearCanvas();
-    setSavedArtworkId(null);
+    const startingColors =
+      initialArtwork && initialArtwork.pageId === currentPage.id ? initialArtwork.pathColors : {};
+    setPathColors(startingColors);
+    revealedRef.current = new Set(Object.keys(startingColors));
+    revealCountRef.current = revealedRef.current.size;
+    completedRef.current = revealedRef.current.size === currentPage.regions.length;
+    setJustSaved(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPageIdx]);
 
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    if (canvas) {
+  // Resize the sparkle canvas to match the container in device pixels.
+  useEffect(() => {
+    const resize = () => {
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
+      const rect = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
       const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
+      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, []);
+
+  const stopLoop = () => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     }
   };
 
-  const getRandomPastel = () => {
-    return PASTEL_RAINBOW[Math.floor(Math.random() * PASTEL_RAINBOW.length)];
-  };
-
-  // Tap-to-Fill click handler
-  const handlePathClick = (pathId: string) => {
-    playSound.pop();
-    const resolvedColor = activeColor === 'rainbow' ? getRandomPastel() : activeColor;
-
-    setColorHistory((prev) => [...prev, { ...pathColors }]);
-    setPathColors((prev) => ({
-      ...prev,
-      [pathId]: resolvedColor,
-    }));
-
-    const newCount = colorCount + 1;
-    setColorCount(newCount);
-    if (newCount % 5 === 0) {
-      playSound.sparkle();
-      onReward();
-    }
-  };
-
-  // Stamp click on SVG
-  const handleSvgClick = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (toolMode !== 'stamp') return;
-    playSound.sparkle();
-
-    const svg = e.currentTarget;
-    const rect = svg.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 400;
-    const y = ((e.clientY - rect.top) / rect.height) * 400;
-
-    const stampObj = STAMPS.find((s) => s.id === selectedStamp);
-    if (stampObj) {
-      setStamps((prev) => [
-        ...prev,
-        { id: `stamp-${Date.now()}-${Math.random()}`, emoji: stampObj.emoji, x, y },
-      ]);
-      const newCount = colorCount + 1;
-      setColorCount(newCount);
-      if (newCount % 6 === 0) {
-        onReward();
-      }
-    }
-  };
-
-  // Undo last action
-  const handleUndo = () => {
-    playSound.tap();
-    if (colorHistory.length > 0) {
-      const prev = colorHistory[colorHistory.length - 1];
-      setPathColors(prev);
-      setColorHistory((h) => h.slice(0, h.length - 1));
-    } else if (stamps.length > 0) {
-      setStamps((s) => s.slice(0, s.length - 1));
-    }
-  };
-
-  // Clear all colors on current page
-  const handleClear = () => {
-    playSound.boing();
-    setPathColors({});
-    setColorHistory([]);
-    setStamps([]);
-    clearCanvas();
-  };
-
-  // Freehand drawing handlers
-  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (toolMode !== 'brush') return;
-    isDrawingRef.current = true;
-
+  // Continuously animate & draw the sparkle particle trail on a lightweight canvas.
+  const tick = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-    const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
-
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.lineWidth = brushSize;
-    ctx.strokeStyle = activeColor === 'rainbow' ? getRandomPastel() : activeColor;
-
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDrawingRef.current || toolMode !== 'brush') return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-    const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
-
-    if (activeColor === 'rainbow') {
-      ctx.strokeStyle = getRandomPastel();
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) {
+      rafRef.current = null;
+      return;
     }
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  };
+    const dpr = window.devicePixelRatio || 1;
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
 
-  const handlePointerUp = () => {
-    if (isDrawingRef.current) {
-      isDrawingRef.current = false;
-      const newCount = colorCount + 1;
-      setColorCount(newCount);
-      if (newCount % 8 === 0) {
-        onReward();
+    const next: SparkleParticle[] = [];
+    for (const p of particlesRef.current) {
+      const life = p.life - 0.028;
+      if (life <= 0) continue;
+      const x = p.x + p.vx;
+      const y = p.y + p.vy;
+      const vy = p.vy + 0.05; // gentle gravity drift
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, life);
+      ctx.font = `${p.size}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(p.glyph, x, y);
+      ctx.restore();
+      next.push({ ...p, x, y, vy, life });
+    }
+    particlesRef.current = next;
+
+    if (next.length > 0) {
+      rafRef.current = requestAnimationFrame(tick);
+    } else {
+      rafRef.current = null;
+    }
+  }, []);
+
+  const ensureLoopRunning = useCallback(() => {
+    if (rafRef.current === null) {
+      rafRef.current = requestAnimationFrame(tick);
+    }
+  }, [tick]);
+
+  useEffect(() => stopLoop, []);
+
+  const spawnSparkles = useCallback(
+    (x: number, y: number, count: number, burst: boolean) => {
+      const glyphs = wandSkin.glyphs;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = burst ? 1.5 + Math.random() * 2.5 : 0.4 + Math.random() * 0.8;
+        particlesRef.current.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - (burst ? 1 : 0.2),
+          life: 1,
+          size: burst ? 14 + Math.random() * 12 : 8 + Math.random() * 8,
+          glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
+          hue: wandSkin.hue,
+        });
       }
+      ensureLoopRunning();
+    },
+    [wandSkin, ensureLoopRunning]
+  );
+
+  const moveWandCursor = (x: number, y: number) => {
+    setWandVisible(true);
+    const el = wandRef.current;
+    if (el) {
+      el.style.transform = `translate(${x}px, ${y}px)`;
     }
   };
 
-  // Download artwork for parents
-  const handleSaveArtwork = () => {
+  const handlePageComplete = useCallback(() => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    playSound.fireworkBurst();
+    onReward();
+  }, [onReward]);
+
+  const revealRegion = useCallback(
+    (regionId: string, x: number, y: number) => {
+      if (revealedRef.current.has(regionId)) return;
+      const region = currentPage.regions.find((r) => r.id === regionId);
+      if (!region) return;
+
+      revealedRef.current.add(regionId);
+      revealCountRef.current += 1;
+      setPathColors((prev) => ({ ...prev, [regionId]: region.defaultColor }));
+      playSound.wandChime(revealCountRef.current);
+      spawnSparkles(x, y, 10, true);
+
+      if (revealedRef.current.size === currentPage.regions.length) {
+        setTimeout(handlePageComplete, 250);
+      }
+    },
+    [currentPage, spawnSparkles, handlePageComplete]
+  );
+
+  const handlePointerEvent = (clientX: number, clientY: number, isDown: boolean) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+
+    moveWandCursor(x, y);
+
+    // Light trail sparkles while dragging, throttled so it stays performant.
+    const now = performance.now();
+    if (isDown && now - lastTrailAtRef.current > 60) {
+      lastTrailAtRef.current = now;
+      spawnSparkles(x, y, 1, false);
+    }
+
+    const el = document.elementFromPoint(clientX, clientY) as HTMLElement | null;
+    const regionId = el?.dataset?.regionId;
+    if (regionId) {
+      revealRegion(regionId, x, y);
+    }
+  };
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    setIsDragging(true);
+    handlePointerEvent(e.clientX, e.clientY, true);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) {
+      moveWandCursor(
+        e.clientX - (containerRef.current?.getBoundingClientRect().left || 0),
+        e.clientY - (containerRef.current?.getBoundingClientRect().top || 0)
+      );
+      return;
+    }
+    handlePointerEvent(e.clientX, e.clientY, true);
+  };
+  const onPointerUp = () => {
+    setIsDragging(false);
+  };
+  const onPointerLeave = () => {
+    setWandVisible(false);
+  };
+
+  const revealedCount = Object.keys(pathColors).length;
+  const totalCount = currentPage.regions.length;
+  const isComplete = revealedCount === totalCount;
+
+  const handleSaveToGallery = () => {
     playSound.sparkle();
-    const svgEl = document.getElementById('coloring-svg');
-    if (!svgEl) return;
-
-    const svgData = new XMLSerializer().serializeToString(svgEl);
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const URL = window.URL || window.webkitURL;
-    const blobURL = URL.createObjectURL(svgBlob);
-
-    const a = document.createElement('a');
-    a.href = blobURL;
-    a.download = `princess-${currentPage.id}.svg`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const saved = saveColoringArtwork({
+      id: savedArtworkId || undefined,
+      pageId: currentPage.id,
+      title: currentPage.title,
+      emoji: currentPage.emoji,
+      pathColors,
+      stamps: [],
+      isFavorite: false,
+      frameStyle: 'gold',
+    });
+    setSavedArtworkId(saved.id);
+    setJustSaved(true);
+    onReward();
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-2 sm:px-4 py-2 flex flex-col gap-3 select-none font-['Fredoka']">
-      {/* Page Selector Carousel (Friendly, big thumb-friendly buttons with preview emojis) */}
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col gap-3 select-none font-['Fredoka']">
+      {/* Page picker row */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {REAL_COLORING_PAGES.map((page, idx) => (
           <button
             key={page.id}
-            id={`btn-page-${page.id}`}
+            id={`btn-coloring-page-${page.id}`}
             onClick={() => {
               playSound.tap();
               setSelectedPageIdx(idx);
             }}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl border-2 transition-all shrink-0 cursor-pointer ${
-              selectedPageIdx === idx
-                ? 'bg-pink-500 border-pink-600 text-white shadow-md scale-105 ring-2 ring-pink-300'
-                : 'bg-white/95 border-pink-200 text-pink-700 hover:bg-pink-50'
+            className={`shrink-0 flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl border-2 font-bold text-[11px] transition active:scale-95 cursor-pointer ${
+              idx === selectedPageIdx
+                ? 'bg-pink-500 border-pink-300 text-white shadow-md scale-105'
+                : 'bg-white border-[#E3D6FF] text-[#4A3B5C] hover:bg-[#FFF0F8]'
             }`}
           >
-            <span className="text-xl sm:text-2xl">{page.emoji}</span>
-            <span className="font-extrabold text-xs sm:text-sm">{page.title}</span>
+            <span className="text-2xl leading-none">{page.emoji}</span>
+            <span className="max-w-[70px] truncate">{page.title.split(' ')[0]}</span>
           </button>
         ))}
       </div>
 
-      {/* Main Workspace: Left Canvas + Right Tools */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-start">
-        {/* The Coloring Canvas (Center / Left) */}
-        <div className="lg:col-span-8 flex flex-col items-center">
-          <div className="relative w-full max-w-[420px] aspect-square bg-white rounded-3xl p-2 border-4 border-pink-300 shadow-xl overflow-hidden touch-none">
-            {/* SVG Interactive Coloring Template */}
-            <svg
-              id="coloring-svg"
-              viewBox="0 0 400 400"
-              className="w-full h-full cursor-pointer"
-              onClick={handleSvgClick}
-            >
-              {/* Clean White Sheet Paper background */}
-              <rect width="400" height="400" fill="#FFFFFF" rx="20" />
+      {/* Header: progress + wand skin picker */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2 bg-white/90 border-2 border-amber-300 rounded-2xl px-3 py-1.5 font-black text-amber-900 text-sm shadow-xs">
+          <Sparkles className="w-4 h-4 text-amber-500" />
+          <span>
+            {revealedCount}/{totalCount} colors found!
+          </span>
+        </div>
 
-              {/* Page Segments (fillable paths) */}
-              {currentPage.regions.map((p) => {
-                const filledColor = pathColors[p.id] || '#FFFFFF';
-                return (
-                  <path
-                    key={p.id}
-                    id={`path-${p.id}`}
-                    d={p.d}
-                    fill={filledColor}
-                    stroke="#1F2937"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    onClick={(e) => {
-                      if (toolMode === 'fill') {
-                        e.stopPropagation();
-                        handlePathClick(p.id);
-                      }
-                    }}
-                    className={`transition-colors duration-150 ${
-                      toolMode === 'fill' ? 'hover:opacity-90' : ''
-                    }`}
-                  />
-                );
-              })}
-
-              {/* Detailed Real Coloring Book Overlays (faces, curls, lace, stitches, sparkles) */}
-              <g
-                className="pointer-events-none select-none"
-                dangerouslySetInnerHTML={{ __html: currentPage.overlaySvg }}
-              />
-
-              {/* Stamped Emojis on SVG */}
-              {stamps.map((s) => (
-                <text
-                  key={s.id}
-                  x={s.x}
-                  y={s.y}
-                  fontSize="36"
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  className="pointer-events-none select-none drop-shadow-sm"
-                >
-                  {s.emoji}
-                </text>
-              ))}
-            </svg>
-
-            {/* Freehand Brush Canvas Overlay */}
-            <canvas
-              ref={canvasRef}
-              width={400}
-              height={400}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-              className={`absolute inset-0 w-full h-full ${
-                toolMode === 'brush' ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'
+        <div className="flex items-center gap-1.5">
+          {WAND_SKINS.map((skin) => (
+            <button
+              key={skin.id}
+              onClick={() => {
+                playSound.tap();
+                setWandSkin(skin);
+              }}
+              className={`w-9 h-9 rounded-full flex items-center justify-center text-lg border-2 transition active:scale-90 cursor-pointer ${
+                wandSkin.id === skin.id
+                  ? 'bg-white border-pink-400 shadow-md scale-110'
+                  : 'bg-white/70 border-[#E3D6FF]'
               }`}
+              title={`${skin.name} Wand`}
+              aria-label={`${skin.name} Wand`}
+            >
+              {skin.emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Magic canvas */}
+      <div
+        ref={containerRef}
+        id="magic-wand-canvas"
+        className="relative w-full aspect-square max-w-[480px] mx-auto rounded-[28px] overflow-hidden border-4 border-white shadow-[0_16px_40px_rgba(255,111,165,0.3)] bg-white touch-none cursor-none"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onPointerLeave={onPointerLeave}
+        onPointerEnter={() => setWandVisible(true)}
+      >
+        <svg viewBox="0 0 400 400" className="w-full h-full block" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="400" fill="#FFFFFF" />
+
+          {currentPage.regions.map((region) => {
+            const revealed = !!pathColors[region.id];
+            return (
+              <path
+                key={region.id}
+                data-region-id={region.id}
+                d={region.d}
+                fill={pathColors[region.id] || '#FFFFFF'}
+                stroke="#1F2937"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={revealed ? '' : 'magic-shimmer'}
+              />
+            );
+          })}
+
+          {currentPage.overlaySvg && (
+            <g
+              className="pointer-events-none select-none"
+              dangerouslySetInnerHTML={{ __html: currentPage.overlaySvg }}
             />
-          </div>
+          )}
+        </svg>
 
-          {/* Quick Undo, Clear & Save Bar below canvas */}
-          <div className="flex items-center gap-3 mt-2">
-            <button
-              id="btn-coloring-undo"
-              onClick={handleUndo}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white border-2 border-pink-200 text-pink-600 font-bold text-xs sm:text-sm hover:bg-pink-50 active:scale-95 transition cursor-pointer shadow-xs"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Undo</span>
-            </button>
-            <button
-              id="btn-coloring-clear"
-              onClick={handleClear}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-50 border-2 border-rose-200 text-rose-600 font-bold text-xs sm:text-sm hover:bg-rose-100 active:scale-95 transition cursor-pointer shadow-xs"
-            >
-              <span>🧼 Clear</span>
-            </button>
-            <button
-              id="btn-coloring-save"
-              onClick={handleSaveArtwork}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-pink-50 border-2 border-pink-300 text-pink-700 font-bold text-xs sm:text-sm hover:bg-pink-100 active:scale-95 transition cursor-pointer shadow-xs"
-            >
-              <Download className="w-4 h-4" />
-              <span>Save</span>
-            </button>
-          </div>
+        {/* Sparkle trail / reveal-burst canvas */}
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+
+        {/* Floating wand cursor */}
+        <div
+          ref={wandRef}
+          className={`absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 text-4xl pointer-events-none transition-opacity duration-150 drop-shadow-[0_4px_6px_rgba(0,0,0,0.25)] ${
+            wandVisible ? 'opacity-100' : 'opacity-0'
+          } ${isDragging ? 'scale-110 rotate-12' : ''}`}
+          style={{ willChange: 'transform' }}
+        >
+          {wandSkin.emoji}
         </div>
 
-        {/* Right Toolbars (Mode Selector, Colors & Stamps) */}
-        <div className="lg:col-span-4 flex flex-col gap-3">
-          {/* Tool Modes: Fill / Brush / Stamp */}
-          <div className="bg-white/95 backdrop-blur-xs p-3 rounded-3xl border-2 border-pink-200 shadow-sm">
-            <h4 className="text-xs font-black text-pink-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Palette className="w-3.5 h-3.5 text-pink-500" />
-              Magic Color Tool
-            </h4>
-            <div className="grid grid-cols-3 gap-2">
+        {/* Completion celebration overlay */}
+        {isComplete && (
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-white via-white/95 to-transparent pt-10 pb-3 px-3 flex flex-col items-center gap-2 animate-in fade-in duration-300">
+            <p className="font-['Baloo_2'] font-extrabold text-[#FF6FA5] text-base sm:text-lg text-center">
+              🎉 Ta-da! The magic picture is complete!
+            </p>
+            <div className="flex items-center gap-2">
               <button
-                id="btn-mode-fill"
-                onClick={() => {
-                  playSound.tap();
-                  setToolMode('fill');
-                }}
-                className={`flex flex-col items-center justify-center p-2 rounded-2xl border-2 transition-all cursor-pointer ${
-                  toolMode === 'fill'
-                    ? 'bg-pink-500 border-pink-600 text-white shadow-md'
-                    : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100'
-                }`}
+                id="btn-save-gallery"
+                onClick={handleSaveToGallery}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-pink-500 to-amber-400 text-white font-black text-sm shadow-md hover:scale-105 active:scale-95 transition cursor-pointer"
               >
-                <span className="text-2xl">✨</span>
-                <span className="text-xs font-extrabold mt-1">Tap-Fill</span>
+                <CartoonGalleryIcon className="w-5 h-5" />
+                <span>{justSaved ? 'Saved! ✓' : 'Save to Gallery'}</span>
               </button>
-
               <button
-                id="btn-mode-brush"
                 onClick={() => {
                   playSound.tap();
-                  setToolMode('brush');
+                  setSelectedPageIdx((idx) => (idx + 1) % REAL_COLORING_PAGES.length);
                 }}
-                className={`flex flex-col items-center justify-center p-2 rounded-2xl border-2 transition-all cursor-pointer ${
-                  toolMode === 'brush'
-                    ? 'bg-purple-500 border-purple-600 text-white shadow-md'
-                    : 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100'
-                }`}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-white border-2 border-[#E3D6FF] text-[#4A3B5C] font-black text-sm shadow-xs hover:scale-105 active:scale-95 transition cursor-pointer"
               >
-                <Paintbrush className="w-6 h-6" />
-                <span className="text-xs font-extrabold mt-1">Brush</span>
-              </button>
-
-              <button
-                id="btn-mode-stamp"
-                onClick={() => {
-                  playSound.tap();
-                  setToolMode('stamp');
-                }}
-                className={`flex flex-col items-center justify-center p-2 rounded-2xl border-2 transition-all cursor-pointer ${
-                  toolMode === 'stamp'
-                    ? 'bg-amber-500 border-amber-600 text-white shadow-md'
-                    : 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
-                }`}
-              >
-                <Stamp className="w-6 h-6" />
-                <span className="text-xs font-extrabold mt-1">Stamps</span>
+                <Wand2 className="w-4 h-4" />
+                <span>Next Picture</span>
               </button>
             </div>
-
-            {/* Brush Size Picker if in Brush Mode */}
-            {toolMode === 'brush' && (
-              <div className="mt-3 flex items-center justify-around bg-purple-50 p-2 rounded-2xl border border-purple-200">
-                {[8, 16, 28].map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => {
-                      playSound.tap();
-                      setBrushSize(size);
-                    }}
-                    className={`flex items-center justify-center rounded-full p-2 border-2 ${
-                      brushSize === size ? 'border-purple-600 bg-white' : 'border-transparent'
-                    }`}
-                  >
-                    <div
-                      className="rounded-full bg-purple-600"
-                      style={{ width: size, height: size }}
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Stamp Selector if in Stamp Mode */}
-            {toolMode === 'stamp' && (
-              <div className="mt-3 grid grid-cols-6 gap-1 bg-amber-50 p-2 rounded-2xl border border-amber-200">
-                {STAMPS.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => {
-                      playSound.tap();
-                      setSelectedStamp(s.id);
-                    }}
-                    className={`text-xl p-1.5 rounded-xl transition ${
-                      selectedStamp === s.id ? 'bg-amber-300 scale-110 shadow-xs' : 'hover:bg-amber-200'
-                    }`}
-                  >
-                    {s.emoji}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
+        )}
+      </div>
 
-          {/* Princess Color Palette (Big, Chunky, Easy to tap with toddler thumbs!) */}
-          <div className="bg-white/95 backdrop-blur-xs p-3 rounded-3xl border-2 border-pink-200 shadow-sm">
-            <h4 className="text-xs font-black text-pink-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-pink-500" />
-              Princess Palette
-            </h4>
-            <div className="grid grid-cols-4 gap-2">
-              {PALETTE_COLORS.map((c) => {
-                const isSelected = activeColor === c.hex;
-                const isRainbow = c.hex === 'rainbow';
+      {/* Helper hint (fades away once they start) */}
+      {revealedCount === 0 && (
+        <p className="text-center text-[#4A3B5C]/70 font-bold text-xs sm:text-sm -mt-1">
+          Drag your finger across the picture to make the colors appear! ✨
+        </p>
+      )}
 
-                return (
-                  <button
-                    key={c.name}
-                    id={`btn-color-${c.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    onClick={() => {
-                      playSound.tap();
-                      setActiveColor(c.hex);
-                    }}
-                    title={c.name}
-                    className={`h-11 sm:h-12 rounded-2xl flex items-center justify-center transition-all cursor-pointer relative shadow-xs ${
-                      isSelected
-                        ? 'ring-4 ring-pink-500 scale-105 z-10'
-                        : 'hover:scale-98 active:scale-90 border-2 border-black/10'
-                    }`}
-                    style={{
-                      background: isRainbow
-                        ? 'linear-gradient(135deg, #F43F5E, #FACC15, #34D399, #38BDF8, #C084FC)'
-                        : c.hex,
-                    }}
-                  >
-                    {isRainbow && <span className="text-xs font-black text-white drop-shadow">✨</span>}
-                    {isSelected && (
-                      <Check
-                        className={`w-5 h-5 drop-shadow-md ${
-                          c.hex === '#FFFFFF' || c.hex === '#FEF3C7' || c.hex === '#FACC15' ? 'text-gray-800' : 'text-white'
-                        }`}
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+      {/* Bottom actions */}
+      <div className="flex items-center justify-center gap-3 pt-1">
+        <button
+          id="btn-save-gallery-anytime"
+          onClick={handleSaveToGallery}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-pink-100 hover:bg-pink-200 text-pink-800 font-bold text-xs sm:text-sm border-2 border-pink-300 transition active:scale-95 cursor-pointer"
+        >
+          <ImageIcon className="w-4 h-4" />
+          <span>{justSaved ? 'Saved! ✓' : 'Save to Gallery'}</span>
+        </button>
+
+        {onOpenGallery && (
+          <button
+            id="btn-open-gallery"
+            onClick={() => {
+              playSound.tap();
+              onOpenGallery();
+            }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-xs sm:text-sm border-2 border-amber-300 transition active:scale-95 cursor-pointer"
+          >
+            <CartoonGalleryIcon className="w-4 h-4" />
+            <span>Royal Gallery</span>
+          </button>
+        )}
       </div>
     </div>
   );

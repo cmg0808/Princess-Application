@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Trophy, Star } from 'lucide-react';
 import { Bubble } from '../types';
 import { playSound } from '../utils/audio';
 
@@ -30,13 +29,13 @@ export const BubblePopGame: React.FC<BubblePopGameProps> = ({ onReward }) => {
       setBubbles((prev) => {
         if (prev.length >= 14) return prev; // Keep reasonable density for toddlers
 
-        const types: ('regular' | 'star' | 'tiara' | 'heart')[] = [
+        const types: ('regular' | 'crown' | 'carriage' | 'frog')[] = [
           'regular',
           'regular',
           'regular',
-          'star',
-          'heart',
-          'tiara',
+          'crown',
+          'carriage',
+          'frog',
         ];
         const chosenType = types[Math.floor(Math.random() * types.length)];
         const colors = ['#F472B6', '#C084FC', '#38BDF8', '#FACC15', '#FB7185', '#34D399'];
@@ -86,12 +85,21 @@ export const BubblePopGame: React.FC<BubblePopGameProps> = ({ onReward }) => {
     e.stopPropagation();
 
     playSound.pop();
-    if (bubble.type === 'tiara' || bubble.type === 'star') {
+    if (bubble.type === 'crown' || bubble.type === 'carriage') {
       playSound.sparkle();
+    } else if (bubble.type === 'frog') {
+      playSound.ribbit();
     }
 
     // Spawn popping sparkles
-    const emojis = bubble.type === 'tiara' ? ['👑', '✨'] : bubble.type === 'heart' ? ['💖', '💕'] : ['✨', '⭐'];
+    const emojis =
+      bubble.type === 'crown'
+        ? ['👑', '✨']
+        : bubble.type === 'carriage'
+        ? ['🎠', '✨']
+        : bubble.type === 'frog'
+        ? ['🐸', '💦']
+        : ['✨', '⭐'];
     const newParticles: Particle[] = [
       { id: Math.random(), x: bubble.x, y: bubble.y, emoji: emojis[0] },
       { id: Math.random(), x: bubble.x + 4, y: bubble.y - 2, emoji: emojis[1] || '✨' },
@@ -191,14 +199,14 @@ export const BubblePopGame: React.FC<BubblePopGameProps> = ({ onReward }) => {
               <div className="absolute top-2 left-3 w-4 h-3 rounded-full bg-white/80 transform -rotate-45" />
 
               {/* Center icon / Surprise */}
-              {bubble.type === 'tiara' && (
+              {bubble.type === 'crown' && (
                 <span className="text-2xl sm:text-3xl filter drop-shadow select-none animate-pulse">👑</span>
               )}
-              {bubble.type === 'star' && (
-                <span className="text-2xl sm:text-3xl filter drop-shadow select-none animate-spin" style={{ animationDuration: '4s' }}>⭐</span>
+              {bubble.type === 'carriage' && (
+                <span className="text-2xl sm:text-3xl filter drop-shadow select-none">🎠</span>
               )}
-              {bubble.type === 'heart' && (
-                <span className="text-2xl sm:text-3xl filter drop-shadow select-none">💖</span>
+              {bubble.type === 'frog' && (
+                <span className="text-2xl sm:text-3xl filter drop-shadow select-none animate-bounce">🐸</span>
               )}
               {bubble.type === 'regular' && (
                 <span className="text-lg opacity-75 select-none">✨</span>
