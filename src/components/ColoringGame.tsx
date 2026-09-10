@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Sparkles, Image as ImageIcon, Wand2 } from 'lucide-react';
+import { Image as ImageIcon, Wand2, Check } from 'lucide-react';
 import { playSound } from '../utils/audio';
 import { REAL_COLORING_PAGES, ColoringPage } from '../data/coloringPagesData';
 import { SavedColoringArtwork } from '../types';
 import { saveColoringArtwork } from '../utils/storage';
 import { CartoonGalleryIcon } from './CartoonIcons';
+import { ColoringPreviewSvg } from './ColoringPreviewSvg';
+import { WandCursorArt, WandTipShape, TwinkleStar, drawSparkleOnCanvas } from './GameArt';
 
 interface ColoringGameProps {
   onReward: () => void;
@@ -20,23 +22,28 @@ interface SparkleParticle {
   vy: number;
   life: number; // 0..1, counts down
   size: number;
-  glyph: string;
   hue: string;
 }
 
 interface WandSkin {
   id: string;
   name: string;
-  emoji: string;
-  glyphs: string[];
+  tip: WandTipShape;
   hue: string;
 }
 
 const WAND_SKINS: WandSkin[] = [
-  { id: 'star', name: 'Starlight', emoji: '🪄', glyphs: ['✨', '⭐', '💫'], hue: '#FACC15' },
-  { id: 'heart', name: 'Sweetheart', emoji: '💖', glyphs: ['💖', '✨', '💕'], hue: '#F472B6' },
-  { id: 'rainbow', name: 'Rainbow', emoji: '🌈', glyphs: ['✨', '🌈', '💫'], hue: '#9333EA' },
+  { id: 'star', name: 'Starlight', tip: 'star', hue: '#FACC15' },
+  { id: 'heart', name: 'Sweetheart', tip: 'heart', hue: '#F472B6' },
+  { id: 'rainbow', name: 'Rainbow', tip: 'rainbow', hue: '#9333EA' },
 ];
+
+// A fully "solved" color map for a page, used for its small preview thumbnail.
+const previewColorsFor = (page: ColoringPage): Record<string, string> =>
+  page.regions.reduce<Record<string, string>>((acc, r) => {
+    acc[r.id] = r.defaultColor;
+    return acc;
+  }, {});
 
 export const ColoringGame: React.FC<ColoringGameProps> = ({
   onReward,
@@ -128,10 +135,7 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
       const vy = p.vy + 0.05; // gentle gravity drift
       ctx.save();
       ctx.globalAlpha = Math.max(0, life);
-      ctx.font = `${p.size}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(p.glyph, x, y);
+      drawSparkleOnCanvas(ctx, x, y, p.size, p.hue);
       ctx.restore();
       next.push({ ...p, x, y, vy, life });
     }
@@ -154,7 +158,6 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
 
   const spawnSparkles = useCallback(
     (x: number, y: number, count: number, burst: boolean) => {
-      const glyphs = wandSkin.glyphs;
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = burst ? 1.5 + Math.random() * 2.5 : 0.4 + Math.random() * 0.8;
@@ -165,7 +168,6 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
           vy: Math.sin(angle) * speed - (burst ? 1 : 0.2),
           life: 1,
           size: burst ? 14 + Math.random() * 12 : 8 + Math.random() * 8,
-          glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
           hue: wandSkin.hue,
         });
       }
@@ -287,13 +289,15 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
               playSound.tap();
               setSelectedPageIdx(idx);
             }}
-            className={`shrink-0 flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl border-2 font-bold text-[11px] transition active:scale-95 cursor-pointer ${
+            className={`shrink-0 flex flex-col items-center gap-1 px-2 py-2 rounded-2xl border-2 font-bold text-[11px] transition active:scale-95 cursor-pointer ${
               idx === selectedPageIdx
                 ? 'bg-pink-500 border-pink-300 text-white shadow-md scale-105'
                 : 'bg-white border-[#E3D6FF] text-[#4A3B5C] hover:bg-[#FFF0F8]'
             }`}
           >
-            <span className="text-2xl leading-none">{page.emoji}</span>
+            <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/70 shadow-xs bg-white">
+              <ColoringPreviewSvg pageId={page.id} pathColors={previewColorsFor(page)} className="w-full h-full" />
+            </div>
             <span className="max-w-[70px] truncate">{page.title.split(' ')[0]}</span>
           </button>
         ))}
@@ -302,7 +306,7 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
       {/* Header: progress + wand skin picker */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 bg-white/90 border-2 border-amber-300 rounded-2xl px-3 py-1.5 font-black text-amber-900 text-sm shadow-xs">
-          <Sparkles className="w-4 h-4 text-amber-500" />
+          <TwinkleStar className="w-4 h-4" color="#F59E0B" />
           <span>
             {revealedCount}/{totalCount} colors found!
           </span>
@@ -316,7 +320,7 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
                 playSound.tap();
                 setWandSkin(skin);
               }}
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-lg border-2 transition active:scale-90 cursor-pointer ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition active:scale-90 cursor-pointer ${
                 wandSkin.id === skin.id
                   ? 'bg-white border-pink-400 shadow-md scale-110'
                   : 'bg-white/70 border-[#E3D6FF]'
@@ -324,7 +328,7 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
               title={`${skin.name} Wand`}
               aria-label={`${skin.name} Wand`}
             >
-              {skin.emoji}
+              <WandCursorArt tip={skin.tip} color={skin.hue} className="w-6 h-6" />
             </button>
           ))}
         </div>
@@ -376,19 +380,21 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
         {/* Floating wand cursor */}
         <div
           ref={wandRef}
-          className={`absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 text-4xl pointer-events-none transition-opacity duration-150 drop-shadow-[0_4px_6px_rgba(0,0,0,0.25)] ${
+          className={`absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-150 ${
             wandVisible ? 'opacity-100' : 'opacity-0'
           } ${isDragging ? 'scale-110 rotate-12' : ''}`}
           style={{ willChange: 'transform' }}
         >
-          {wandSkin.emoji}
+          <WandCursorArt tip={wandSkin.tip} color={wandSkin.hue} className="w-12 h-12 drop-shadow-[0_4px_6px_rgba(0,0,0,0.25)]" />
         </div>
 
         {/* Completion celebration overlay */}
         {isComplete && (
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-white via-white/95 to-transparent pt-10 pb-3 px-3 flex flex-col items-center gap-2 animate-in fade-in duration-300">
-            <p className="font-['Baloo_2'] font-extrabold text-[#FF6FA5] text-base sm:text-lg text-center">
-              🎉 Ta-da! The magic picture is complete!
+            <p className="flex items-center gap-2 font-['Baloo_2'] font-extrabold text-[#FF6FA5] text-base sm:text-lg text-center">
+              <TwinkleStar className="w-5 h-5" color="#FACC15" />
+              <span>Ta-da! The magic picture is complete!</span>
+              <TwinkleStar className="w-5 h-5" color="#FACC15" />
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -396,8 +402,8 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
                 onClick={handleSaveToGallery}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-pink-500 to-amber-400 text-white font-black text-sm shadow-md hover:scale-105 active:scale-95 transition cursor-pointer"
               >
-                <CartoonGalleryIcon className="w-5 h-5" />
-                <span>{justSaved ? 'Saved! ✓' : 'Save to Gallery'}</span>
+                {justSaved ? <Check className="w-4 h-4" /> : <CartoonGalleryIcon className="w-5 h-5" />}
+                <span>{justSaved ? 'Saved!' : 'Save to Gallery'}</span>
               </button>
               <button
                 onClick={() => {
@@ -416,8 +422,10 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
 
       {/* Helper hint (fades away once they start) */}
       {revealedCount === 0 && (
-        <p className="text-center text-[#4A3B5C]/70 font-bold text-xs sm:text-sm -mt-1">
-          Drag your finger across the picture to make the colors appear! ✨
+        <p className="flex items-center justify-center gap-1.5 text-center text-[#4A3B5C]/70 font-bold text-xs sm:text-sm -mt-1">
+          <TwinkleStar className="w-3.5 h-3.5" />
+          <span>Drag your finger across the picture to make the colors appear!</span>
+          <TwinkleStar className="w-3.5 h-3.5" />
         </p>
       )}
 
@@ -428,8 +436,8 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
           onClick={handleSaveToGallery}
           className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-pink-100 hover:bg-pink-200 text-pink-800 font-bold text-xs sm:text-sm border-2 border-pink-300 transition active:scale-95 cursor-pointer"
         >
-          <ImageIcon className="w-4 h-4" />
-          <span>{justSaved ? 'Saved! ✓' : 'Save to Gallery'}</span>
+          {justSaved ? <Check className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
+          <span>{justSaved ? 'Saved!' : 'Save to Gallery'}</span>
         </button>
 
         {onOpenGallery && (

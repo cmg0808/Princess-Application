@@ -1,6 +1,19 @@
 import React, { useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { playSound } from '../utils/audio';
+import {
+  TeapotArt,
+  TeacupArt,
+  PlateArt,
+  CupcakeArt,
+  FlowerArt,
+  HeartShape,
+  TwinkleStar,
+  PrincessPortrait,
+  UnicornPortrait,
+  BunnyPortrait,
+  FrogPortrait,
+} from './GameArt';
 
 interface TeaPartyGameProps {
   onReward: () => void;
@@ -9,50 +22,17 @@ interface TeaPartyGameProps {
 interface TeaPartyGuest {
   id: string;
   name: string;
-  emoji: string;
-  dialogue: string;
+  Portrait: React.FC<{ className?: string }>;
   cupFill: number; // 0 to 100%
   hasCupcake: boolean;
   happyReaction: boolean;
 }
 
 const INITIAL_GUESTS: TeaPartyGuest[] = [
-  {
-    id: 'princess-lily',
-    name: 'Princess Lily',
-    emoji: '👸',
-    dialogue: 'A cup of chamomile tea, please! ☕',
-    cupFill: 0,
-    hasCupcake: false,
-    happyReaction: false,
-  },
-  {
-    id: 'sparkle-unicorn',
-    name: 'Sparkle Unicorn',
-    emoji: '🦄',
-    dialogue: 'Neigh! I love rainbow cupcakes! 🌈',
-    cupFill: 0,
-    hasCupcake: false,
-    happyReaction: false,
-  },
-  {
-    id: 'twinkle-bunny',
-    name: 'Twinkle Bunny',
-    emoji: '🐰',
-    dialogue: 'Sip sip! So yummy and sweet! 🌸',
-    cupFill: 0,
-    hasCupcake: false,
-    happyReaction: false,
-  },
-  {
-    id: 'pippin-frog',
-    name: 'Prince Pippin',
-    emoji: '🐸',
-    dialogue: 'Ribbit! Royal tea party is the best! 👑',
-    cupFill: 0,
-    hasCupcake: false,
-    happyReaction: false,
-  },
+  { id: 'princess-lily', name: 'Princess Lily', Portrait: PrincessPortrait, cupFill: 0, hasCupcake: false, happyReaction: false },
+  { id: 'sparkle-unicorn', name: 'Sparkle Unicorn', Portrait: UnicornPortrait, cupFill: 0, hasCupcake: false, happyReaction: false },
+  { id: 'twinkle-bunny', name: 'Twinkle Bunny', Portrait: BunnyPortrait, cupFill: 0, hasCupcake: false, happyReaction: false },
+  { id: 'pippin-frog', name: 'Prince Pippin', Portrait: FrogPortrait, cupFill: 0, hasCupcake: false, happyReaction: false },
 ];
 
 export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
@@ -116,7 +96,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
     <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-3 select-none font-['Fredoka']">
       {/* Header */}
       <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs px-4 py-2.5 rounded-3xl border-2 border-pink-200 shadow-sm flex items-center gap-2">
-        <span className="text-3xl animate-bounce">🫖</span>
+        <TeapotArt className="w-9 h-9 shrink-0" />
         <div>
           <h3 className="text-base sm:text-lg font-black text-pink-800 leading-tight">
             Royal Tea Party
@@ -132,7 +112,12 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
         {/* Tablecloth & Centerpiece */}
         <div className="absolute inset-x-8 bottom-4 h-40 bg-white/90 rounded-3xl border-3 border-pink-200 shadow-lg flex flex-col items-center justify-center pointer-events-none">
           <div className="w-full h-4 bg-pink-300/40" />
-          <div className="text-4xl my-auto opacity-70">🌸 🫖 🧁 🌸</div>
+          <div className="flex items-center gap-4 my-auto opacity-70">
+            <FlowerArt className="w-6 h-6" color="#F472B6" />
+            <TeapotArt className="w-8 h-8" />
+            <CupcakeArt className="w-7 h-7" />
+            <FlowerArt className="w-6 h-6" color="#C084FC" />
+          </div>
           <div className="w-full h-4 bg-pink-300/40" />
         </div>
 
@@ -140,6 +125,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
         <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-2 h-full items-center">
           {guests.map((guest) => {
             const isPouring = activePouringId === guest.id;
+            const Portrait = guest.Portrait;
             return (
               <div
                 key={guest.id}
@@ -148,16 +134,16 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
               >
                 {/* Happy Reaction Hearts */}
                 {guest.happyReaction && (
-                  <div className="absolute -top-6 text-2xl animate-bounce text-rose-500 z-30">
-                    💖 ✨ 💖
+                  <div className="absolute -top-6 flex items-center gap-0.5 animate-bounce z-30">
+                    <HeartShape className="w-4 h-4" />
+                    <TwinkleStar className="w-4 h-4" color="#FACC15" />
+                    <HeartShape className="w-4 h-4" />
                   </div>
                 )}
 
-                {/* Guest Character Face / Avatar */}
+                {/* Guest Character Portrait */}
                 <div className="flex flex-col items-center">
-                  <span className="text-5xl sm:text-6xl filter drop-shadow select-none">
-                    {guest.emoji}
-                  </span>
+                  <Portrait className="w-14 h-14 sm:w-16 sm:h-16 filter drop-shadow select-none" />
                   <span className="text-xs font-black text-pink-900 bg-white/90 px-2 py-0.5 rounded-full shadow-2xs border border-pink-200 mt-1">
                     {guest.name}
                   </span>
@@ -168,33 +154,32 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
                   <button
                     id={`btn-pour-${guest.id}`}
                     onClick={() => handlePourTea(guest.id)}
-                    className="relative w-11 h-10 bg-white rounded-b-xl border-2 border-pink-300 flex items-end p-0.5 overflow-hidden shadow-xs cursor-pointer hover:scale-115 active:scale-90 transition-transform"
+                    className="w-11 h-11 cursor-pointer hover:scale-115 active:scale-90 transition-transform"
                     title="Tap to pour tea"
                     aria-label={`Pour tea for ${guest.name}`}
                   >
-                    <div
-                      className="w-full bg-linear-to-t from-amber-600 via-amber-400 to-amber-300 rounded-b-lg transition-all duration-500"
-                      style={{ height: `${guest.cupFill}%` }}
-                    />
-                    <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-pink-700">
-                      {guest.cupFill > 0 ? '☕' : '🫖'}
-                    </span>
+                    <TeacupArt className="w-full h-full drop-shadow-xs" fillPercent={guest.cupFill} />
                   </button>
 
                   <button
                     id={`btn-feed-${guest.id}`}
                     onClick={() => handleFeedGuest(guest.id)}
-                    className="w-11 h-10 bg-pink-100 rounded-full border-2 border-pink-300 flex items-center justify-center shadow-xs cursor-pointer hover:scale-115 active:scale-90 transition-transform text-xl"
+                    className="relative w-11 h-11 cursor-pointer hover:scale-115 active:scale-90 transition-transform"
                     title="Tap to give a cupcake"
                     aria-label={`Feed cupcake to ${guest.name}`}
                   >
-                    {guest.hasCupcake ? '🧁' : '🍽️'}
+                    <PlateArt className="w-full h-full drop-shadow-xs" />
+                    {guest.hasCupcake && (
+                      <CupcakeArt className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-7 h-7 drop-shadow" />
+                    )}
                   </button>
                 </div>
 
                 {/* Pouring Teapot Stream Animation */}
                 {isPouring && (
-                  <div className="absolute -top-4 right-1 text-3xl animate-bounce z-30">🫖💦</div>
+                  <div className="absolute -top-5 right-0 animate-bounce z-30">
+                    <TeapotArt className="w-8 h-8" />
+                  </div>
                 )}
               </div>
             );
@@ -203,7 +188,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
 
         {/* Hint at bottom */}
         <div className="relative z-10 self-center bg-white/85 backdrop-blur-xs px-3 py-1 rounded-full border border-pink-200 text-xs font-black text-pink-700 pointer-events-none">
-          👆 Tap a teacup to pour ☕ or tap a plate to feed treats 🧁!
+          Tap a teacup to pour, or tap a plate to feed treats!
         </div>
       </div>
 
@@ -218,7 +203,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
           }}
           className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-linear-to-b from-amber-400 to-yellow-500 text-amber-950 font-black text-xs sm:text-sm shadow-md hover:scale-102 active:scale-95 transition cursor-pointer border-2 border-yellow-300"
         >
-          <span className="text-xl">🫖</span>
+          <TeapotArt className="w-6 h-6" />
           <span>Pour Tea for All!</span>
         </button>
 
@@ -231,7 +216,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
           }}
           className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-linear-to-b from-pink-400 to-rose-500 text-white font-black text-xs sm:text-sm shadow-md hover:scale-102 active:scale-95 transition cursor-pointer border-2 border-pink-300"
         >
-          <span className="text-xl">🧁</span>
+          <CupcakeArt className="w-6 h-6" />
           <span>Feed Cupcakes!</span>
         </button>
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Sparkles, Camera, RotateCw } from 'lucide-react';
+import { Camera, RotateCw } from 'lucide-react';
 import { playSound } from '../utils/audio';
 import {
   CHARACTERS,
@@ -11,6 +11,7 @@ import {
   TiaraItem,
   ShoeItem,
 } from '../data/dressUpData';
+import { TiaraArt, GownArt, ShoeArt, TwinkleStar } from './GameArt';
 
 interface DressUpGameProps {
   onReward: () => void;
@@ -27,8 +28,18 @@ interface FlightState {
   phase: 'flying' | 'landed';
 }
 
-const itemEmoji = (kind: ItemKind, item: AnyItem): string =>
-  kind === 'dress' ? (item as DressItem).previewEmoji : (item as TiaraItem | ShoeItem).emoji;
+const itemArt = (kind: ItemKind, item: AnyItem, className: string): React.ReactNode => {
+  if (kind === 'tiara') {
+    const t = item as TiaraItem;
+    return <TiaraArt className={className} color={t.color} gem={t.gem} />;
+  }
+  if (kind === 'dress') {
+    const d = item as DressItem;
+    return <GownArt className={className} color1={d.color1} color2={d.color2} accent={d.accent} />;
+  }
+  const s = item as ShoeItem;
+  return <ShoeArt className={className} color={s.color} accent={s.accent} />;
+};
 
 export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
   const [character, setCharacter] = useState<PrincessAvatar>(CHARACTERS[0]);
@@ -154,13 +165,13 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
             onPointerMove={onDragMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
-            className={`shrink-0 w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full flex items-center justify-center text-3xl sm:text-4xl shadow-md border-2 touch-none cursor-grab active:cursor-grabbing transition active:scale-90 ${
-              equippedId === item.id ? 'border-amber-400 ring-4 ring-amber-200 scale-105' : 'border-white'
+            className={`shrink-0 w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full flex items-center justify-center shadow-md border-2 bg-white touch-none cursor-grab active:cursor-grabbing transition active:scale-90 ${
+              equippedId === item.id ? 'border-amber-400 ring-4 ring-amber-200 scale-105' : 'border-[#F0E6FF]'
             }`}
-            style={{ background: color(item) }}
+            style={{ boxShadow: `inset 0 0 0 100px ${color(item)}22` }}
             title={item.name}
           >
-            {itemEmoji(kind, item)}
+            {itemArt(kind, item, 'w-10 h-10 sm:w-11 sm:h-11')}
           </button>
         ))}
       </div>
@@ -205,9 +216,11 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
               pulseZone === 'tiara' ? 'scale-125' : ''
             } ${!tiara ? 'border-4 border-dashed border-amber-400/70 animate-pulse' : ''}`}
           >
-            <span className={tiara ? 'text-5xl drop-shadow-md' : 'text-2xl opacity-40'}>
-              {tiara ? tiara.emoji : '👑'}
-            </span>
+            {tiara ? (
+              <TiaraArt className="w-14 h-14 drop-shadow-md" color={tiara.color} gem={tiara.gem} />
+            ) : (
+              <TiaraArt className="w-8 h-8 opacity-30" color="#E5E7EB" gem="#D1D5DB" />
+            )}
           </div>
 
           {/* Head */}
@@ -231,11 +244,12 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
             />
           </div>
 
-          {/* Dress / body drop zone */}
+          {/* Dress / body drop zone — the colored block itself is the gown,
+              so we don't duplicate it with a floating icon on top. */}
           <div
             ref={dressZoneRef}
             id="dressup-zone-dress"
-            className={`absolute left-1/2 -translate-x-1/2 top-[148px] w-[170px] h-[180px] rounded-t-[70px] rounded-b-[24px] flex flex-col items-center justify-start pt-6 gap-1 transition-transform ${
+            className={`absolute left-1/2 -translate-x-1/2 top-[148px] w-[150px] h-[180px] rounded-[26px] flex flex-col items-center justify-start pt-4 gap-1 transition-transform ${
               pulseZone === 'dress' ? 'scale-105' : ''
             } ${!dress ? 'bg-white/80 border-4 border-dashed border-pink-300 animate-pulse' : 'border-4'}`}
             style={
@@ -248,7 +262,7 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
             }
           >
             {dress ? (
-              <span className="text-4xl drop-shadow-md">{dress.previewEmoji}</span>
+              <div className="w-16 h-2.5 rounded-full" style={{ background: dress.accent }} />
             ) : (
               <span className="text-[11px] font-extrabold text-pink-400/80 mt-8 text-center px-4">
                 Drag a gown here!
@@ -266,11 +280,11 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
           >
             {shoes ? (
               <>
-                <span className="text-3xl drop-shadow-md -scale-x-100">{shoes.emoji}</span>
-                <span className="text-3xl drop-shadow-md">{shoes.emoji}</span>
+                <ShoeArt className="w-9 h-9 drop-shadow-md -scale-x-100" color={shoes.color} accent={shoes.accent} />
+                <ShoeArt className="w-9 h-9 drop-shadow-md" color={shoes.color} accent={shoes.accent} />
               </>
             ) : (
-              <span className="text-xl opacity-40">👣</span>
+              <ShoeArt className="w-8 h-8 opacity-30" color="#E5E7EB" accent="#D1D5DB" />
             )}
           </div>
         </div>
@@ -280,7 +294,7 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
       {flight && (
         <div
           onTransitionEnd={onFlightTransitionEnd}
-          className={`fixed z-50 pointer-events-none text-5xl select-none ${
+          className={`fixed z-50 pointer-events-none select-none ${
             flight.phase === 'landed' ? 'transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]' : ''
           }`}
           style={{
@@ -291,19 +305,21 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
             })`,
           }}
         >
-          {itemEmoji(flight.kind, flight.item)}
+          {itemArt(flight.kind, flight.item, 'w-11 h-11 drop-shadow-lg')}
         </div>
       )}
 
-      <p className="text-center text-[#4A3B5C]/70 font-bold text-xs sm:text-sm -mt-1">
-        Drag a tiara, gown or shoes onto the princess — it'll snap right into place! ✨
+      <p className="flex items-center justify-center gap-1.5 text-center text-[#4A3B5C]/70 font-bold text-xs sm:text-sm -mt-1">
+        <TwinkleStar className="w-3.5 h-3.5" />
+        <span>Drag a tiara, gown or shoes onto the princess — it'll snap right into place!</span>
+        <TwinkleStar className="w-3.5 h-3.5" />
       </p>
 
       {/* Item trays */}
       <div className="flex flex-col gap-3">
-        {trayRow('👑 Tiaras', 'tiara', TIARAS, (i) => (i as TiaraItem).color, tiara?.id)}
-        {trayRow('👗 Ballgowns', 'dress', DRESSES, (i) => (i as DressItem).color1, dress?.id)}
-        {trayRow('👠 Shoes', 'shoes', SHOES, (i) => (i as ShoeItem).color, shoes?.id)}
+        {trayRow('Tiaras', 'tiara', TIARAS, (i) => (i as TiaraItem).color, tiara?.id)}
+        {trayRow('Ballgowns', 'dress', DRESSES, (i) => (i as DressItem).color1, dress?.id)}
+        {trayRow('Shoes', 'shoes', SHOES, (i) => (i as ShoeItem).color, shoes?.id)}
       </div>
 
       {/* Actions */}
@@ -325,7 +341,7 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
           <span>Photo!</span>
         </button>
         <div className="flex items-center gap-1 text-amber-500">
-          <Sparkles className="w-4 h-4" />
+          <TwinkleStar className="w-4 h-4" />
         </div>
       </div>
     </div>
