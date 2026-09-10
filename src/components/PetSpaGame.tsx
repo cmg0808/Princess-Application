@@ -1,473 +1,221 @@
-import React, { useState } from 'react';
-import { Sparkles, RotateCcw, Heart, Droplets, Check, Star, Wind } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 import { playSound } from '../utils/audio';
-import { CartoonPetGraphic } from './CartoonPetGraphic';
+import { TwinkleStar } from './GameArt';
 
 interface PetSpaGameProps {
   onReward: () => void;
 }
 
-interface RoyalPet {
-  id: 'unicorn' | 'bunny' | 'kitten' | 'puppy';
+interface PetDef {
+  id: string;
   name: string;
-  title: string;
-  emoji: string;
-  species: string;
-  sound: () => void;
-  bubbleCount: number;
-  isWashed: boolean;
-  isRinsed: boolean;
-  isDry: boolean;
-  isBrushed: boolean;
-  accessoryId?: string;
-  accessoryEmoji?: string;
+  before: string;
+  soapy: string;
 }
 
-const INITIAL_PETS: RoyalPet[] = [
-  {
-    id: 'unicorn',
-    name: 'Sparkle',
-    title: 'The Rainbow Unicorn',
-    emoji: '🦄',
-    species: 'Unicorn',
-    sound: () => playSound.neigh(),
-    bubbleCount: 0,
-    isWashed: false,
-    isRinsed: false,
-    isDry: false,
-    isBrushed: false,
-  },
-  {
-    id: 'bunny',
-    name: 'Twinkle',
-    title: 'The Palace Bunny',
-    emoji: '🐰',
-    species: 'Bunny',
-    sound: () => playSound.giggle(),
-    bubbleCount: 0,
-    isWashed: false,
-    isRinsed: false,
-    isDry: false,
-    isBrushed: false,
-  },
-  {
-    id: 'kitten',
-    name: 'Princess Bella',
-    title: 'The Royal Kitten',
-    emoji: '🐱',
-    species: 'Kitten',
-    sound: () => playSound.giggle(),
-    bubbleCount: 0,
-    isWashed: false,
-    isRinsed: false,
-    isDry: false,
-    isBrushed: false,
-  },
-  {
-    id: 'puppy',
-    name: 'Flora',
-    title: 'The Royal Palace Puppy',
-    emoji: '🐶',
-    species: 'Puppy',
-    sound: () => playSound.giggle(),
-    bubbleCount: 0,
-    isWashed: false,
-    isRinsed: false,
-    isDry: false,
-    isBrushed: false,
-  },
+const PETS: PetDef[] = [
+  { id: 'dog', name: 'Puppy', before: '/art/pet-dog-before.png', soapy: '/art/pet-dog-soapy.png' },
+  { id: 'cat', name: 'Kitten', before: '/art/pet-cat-before.png', soapy: '/art/pet-cat-soapy.png' },
+  { id: 'bunny', name: 'Bunny', before: '/art/pet-bunny-before.png', soapy: '/art/pet-bunny-soapy.png' },
+  { id: 'lamb', name: 'Lamb', before: '/art/pet-lamb-before.png', soapy: '/art/pet-lamb-soapy.png' },
+  { id: 'guinea', name: 'Guinea Pig', before: '/art/pet-guinea-before.png', soapy: '/art/pet-guinea-soapy.png' },
+  { id: 'duck', name: 'Duckling', before: '/art/pet-duck-before.png', soapy: '/art/pet-duck-soapy.png' },
 ];
 
-const PET_ACCESSORIES = [
-  { id: 'tiara', name: 'Mini Tiara', emoji: '👑' },
-  { id: 'bow', name: 'Pink Bow', emoji: '🎀' },
-  { id: 'flower', name: 'Blossom', emoji: '🌸' },
-  { id: 'bell', name: 'Gold Bell', emoji: '🔔' },
-  { id: 'star', name: 'Starlight', emoji: '⭐' },
-  { id: 'heart', name: 'Ruby Pin', emoji: '💖' },
+type StepId = 'wash' | 'rinse' | 'brush' | 'dry';
+
+interface StepDef {
+  id: StepId;
+  label: string;
+  src: string;
+  sound: () => void;
+}
+
+const STEPS: StepDef[] = [
+  { id: 'wash', label: 'Soap', src: '/art/spa-sponge.png', sound: () => playSound.splashWater() },
+  { id: 'rinse', label: 'Rinse', src: '/art/spa-droplets.png', sound: () => playSound.splash() },
+  { id: 'brush', label: 'Brush', src: '/art/spa-hairbrush.png', sound: () => playSound.brushStroke() },
+  { id: 'dry', label: 'Dry', src: '/art/spa-hairdryer.png', sound: () => playSound.chime() },
+];
+
+const SPARKLE_BURSTS = [
+  '/art/sparkle-burst-pink.png',
+  '/art/sparkle-burst-yellow.png',
+  '/art/sparkle-burst-blue.png',
+  '/art/sparkle-burst-purple.png',
 ];
 
 export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
-  const [pets, setPets] = useState<RoyalPet[]>(INITIAL_PETS);
-  const [activePetIndex, setActivePetIndex] = useState(0);
-  const [activeTool, setActiveTool] = useState<'soap' | 'rinse' | 'dry' | 'brush'>('soap');
-  const [isSparkling, setIsSparkling] = useState(false);
-  const [petHappiness, setPetHappiness] = useState(false);
+  const [selectedPetId, setSelectedPetId] = useState(PETS[0].id);
+  const [progress, setProgress] = useState<Record<string, Set<StepId>>>({});
+  const [celebrating, setCelebrating] = useState(false);
+  const [bounce, setBounce] = useState(false);
+  const cleanedRef = useRef<Set<string>>(new Set());
 
-  const currentPet = pets[activePetIndex];
+  const selectedPet = PETS.find((p) => p.id === selectedPetId) ?? PETS[0];
+  const doneSteps = progress[selectedPetId] ?? new Set<StepId>();
+  const isClean = doneSteps.size === STEPS.length;
+  const isSoapy = doneSteps.size > 0 && !isClean;
+  const cleanedCount = cleanedRef.current.size;
 
-  // Tool 1: Soap up with bubbles
-  const handleApplySoap = () => {
-    playSound.pop();
-    setPets((prev) =>
-      prev.map((p, idx) => {
-        if (idx === activePetIndex) {
-          const nextCount = Math.min(12, p.bubbleCount + 3);
-          const isDone = nextCount >= 9;
-          return {
-            ...p,
-            bubbleCount: nextCount,
-            isWashed: isDone,
-            isRinsed: false,
-            isDry: false,
-          };
-        }
-        return p;
-      })
-    );
-
-    triggerHappiness();
+  const handleSelectPet = (id: string) => {
+    playSound.tap();
+    setSelectedPetId(id);
   };
 
-  // Tool 2: Warm shower rinse
-  const handleRinse = () => {
-    playSound.splashWater();
-    setPets((prev) =>
-      prev.map((p, idx) => {
-        if (idx === activePetIndex) {
-          return {
-            ...p,
-            bubbleCount: 0,
-            isWashed: true,
-            isRinsed: true,
-            isDry: false,
-          };
-        }
-        return p;
-      })
-    );
-
-    triggerHappiness();
-  };
-
-  // Tool 3: Warm Fluff Dryer
-  const handleBlowDry = () => {
-    playSound.chime();
-    setPets((prev) =>
-      prev.map((p, idx) => {
-        if (idx === activePetIndex) {
-          return {
-            ...p,
-            isDry: true,
-          };
-        }
-        return p;
-      })
-    );
-
-    triggerHappiness();
-  };
-
-  // Tool 4: Magic Brush
-  const handleBrush = () => {
-    playSound.brushStroke();
-    setIsSparkling(true);
-    setTimeout(() => setIsSparkling(false), 1200);
-
-    const pet = pets[activePetIndex];
-    const isFinishing = pet && pet.isWashed && pet.isRinsed && !pet.isBrushed;
-
-    setPets((prev) =>
-      prev.map((p, idx) => (idx === activePetIndex ? { ...p, isBrushed: true, isDry: true } : p))
-    );
-
-    if (isFinishing) {
-      playSound.fanfare();
-      onReward();
+  const handleApplyStep = (step: StepDef) => {
+    if (doneSteps.has(step.id)) {
+      playSound.tap();
+      return;
     }
+    step.sound();
+    setBounce(true);
+    setTimeout(() => setBounce(false), 400);
 
-    triggerHappiness();
+    setProgress((prev) => {
+      const next = new Set(prev[selectedPetId] ?? []);
+      next.add(step.id);
+      const updated = { ...prev, [selectedPetId]: next };
+
+      if (next.size === STEPS.length && !cleanedRef.current.has(selectedPetId)) {
+        cleanedRef.current.add(selectedPetId);
+        setTimeout(() => {
+          playSound.fireworkBurst();
+          setCelebrating(true);
+          onReward();
+          setTimeout(() => setCelebrating(false), 1200);
+        }, 150);
+      }
+
+      return updated;
+    });
   };
 
-  // Tap directly on pet
-  const handlePetDirectTap = () => {
-    currentPet.sound();
-    triggerHappiness();
-
-    if (activeTool === 'soap') {
-      handleApplySoap();
-    } else if (activeTool === 'rinse') {
-      handleRinse();
-    } else if (activeTool === 'dry') {
-      handleBlowDry();
-    } else if (activeTool === 'brush') {
-      handleBrush();
-    }
-  };
-
-  const triggerHappiness = () => {
-    setPetHappiness(true);
-    setTimeout(() => setPetHappiness(false), 1000);
-  };
-
-  // Toggle accessory
-  const handleSelectAccessory = (accId: string, emoji: string) => {
-    playSound.sparkle();
-    setPets((prev) =>
-      prev.map((p, idx) => {
-        if (idx === activePetIndex) {
-          const currentAcc = p.accessoryId;
-          return {
-            ...p,
-            accessoryId: currentAcc === accId ? undefined : accId,
-            accessoryEmoji: currentAcc === accId ? undefined : emoji,
-          };
-        }
-        return p;
-      })
-    );
-
-    triggerHappiness();
-  };
-
-  // Reset current pet
   const handleResetPet = () => {
-    playSound.boing();
-    setPets((prev) =>
-      prev.map((p, idx) => {
-        if (idx === activePetIndex) {
-          return {
-            ...p,
-            bubbleCount: 0,
-            isWashed: false,
-            isRinsed: false,
-            isDry: false,
-            isBrushed: false,
-            accessoryId: undefined,
-            accessoryEmoji: undefined,
-          };
-        }
-        return p;
-      })
-    );
+    playSound.tap();
+    setProgress((prev) => ({ ...prev, [selectedPetId]: new Set() }));
+    cleanedRef.current.delete(selectedPetId);
   };
 
   return (
     <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-3 select-none font-['Fredoka']">
-      {/* Top Header & Pet Selector */}
-      <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs px-4 py-2.5 rounded-3xl border-2 border-pink-200 shadow-sm flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-3xl animate-bounce">🛁</span>
-          <div>
-            <h3 className="text-base sm:text-lg font-black text-pink-800 leading-tight">
-              Royal Pet Spa & Salon
-            </h3>
-            <span className="text-xs font-bold text-pink-500">
-              {currentPet.name} {currentPet.title}
-            </span>
-          </div>
+      {/* Header */}
+      <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs px-4 py-2.5 rounded-3xl border-2 border-sky-200 shadow-sm flex items-center justify-between gap-2">
+        <div>
+          <h3 className="text-base sm:text-lg font-black text-sky-800 leading-tight">Royal Pet Spa</h3>
+          <span className="text-xs font-bold text-sky-500">Soap, rinse, brush &amp; dry your furry friends!</span>
         </div>
+        <div className="flex items-center gap-1.5 bg-sky-50 border-2 border-sky-200 rounded-full px-3 py-1.5 shrink-0">
+          <TwinkleStar className="w-4 h-4" color="#38BDF8" />
+          <span className="text-xs font-black text-sky-700">{cleanedCount}/{PETS.length}</span>
+        </div>
+      </div>
 
-        {/* Pet Carousel Buttons */}
-        <div className="flex items-center gap-1.5 overflow-x-auto">
-          {pets.map((pet, idx) => (
+      {/* Spa Stage */}
+      <div
+        className="relative w-full max-w-2xl h-[340px] sm:h-[380px] rounded-3xl border-4 border-white shadow-2xl overflow-hidden flex items-end justify-center bg-cover bg-center"
+        style={{ backgroundImage: "url('/art/spa-bg-bathroom.png')" }}
+      >
+        <div className="absolute inset-0 bg-white/10" />
+
+        {/* Pet */}
+        <button
+          id="spa-pet-stage"
+          onClick={() => {
+            if (isClean) {
+              playSound.sparkle();
+            } else {
+              playSound.tap();
+            }
+          }}
+          className={`relative z-10 mb-6 w-40 h-40 sm:w-48 sm:h-48 cursor-pointer transition-transform duration-300 ${
+            bounce ? 'scale-110' : 'hover:scale-105 active:scale-95'
+          }`}
+          title={selectedPet.name}
+        >
+          <img
+            src={isSoapy ? selectedPet.soapy : selectedPet.before}
+            alt={selectedPet.name}
+            className="w-full h-full object-contain drop-shadow-xl select-none"
+            draggable={false}
+          />
+
+          {/* Celebration sparkle burst */}
+          {celebrating && (
+            <img
+              src={SPARKLE_BURSTS[Math.floor(Math.random() * SPARKLE_BURSTS.length)]}
+              alt=""
+              className="absolute -inset-6 w-[calc(100%+3rem)] h-[calc(100%+3rem)] object-contain pointer-events-none animate-ping"
+            />
+          )}
+        </button>
+
+        {/* "Squeaky clean" badge */}
+        {isClean && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-white/95 px-3 py-1.5 rounded-full border-2 border-sky-300 shadow-md">
+            <TwinkleStar className="w-4 h-4" color="#38BDF8" />
+            <span className="text-xs font-black text-sky-800">Squeaky clean!</span>
+          </div>
+        )}
+      </div>
+
+      {/* Pet Picker */}
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-1 px-1 w-full max-w-2xl justify-center scrollbar-none">
+        {PETS.map((pet) => {
+          const petClean = cleanedRef.current.has(pet.id);
+          return (
             <button
               key={pet.id}
-              id={`pet-tab-${pet.id}`}
-              onClick={() => {
-                pet.sound();
-                setActivePetIndex(idx);
-              }}
-              className={`flex items-center justify-center w-11 h-11 rounded-2xl border-2 transition cursor-pointer text-xl ${
-                activePetIndex === idx
-                  ? 'bg-pink-500 border-pink-600 text-white shadow-md scale-105 ring-2 ring-pink-300'
-                  : 'bg-pink-50 border-pink-200 hover:bg-pink-100'
+              id={`spa-select-${pet.id}`}
+              onClick={() => handleSelectPet(pet.id)}
+              className={`relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white p-1 border-2 transition active:scale-90 cursor-pointer ${
+                selectedPetId === pet.id ? 'border-sky-400 ring-4 ring-sky-200 scale-110' : 'border-[#E3D6FF]'
               }`}
               title={pet.name}
             >
-              <span>{pet.emoji}</span>
+              <img src={pet.before} alt={pet.name} className="w-full h-full object-contain" draggable={false} />
+              {petClean && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-sky-400 border-2 border-white flex items-center justify-center">
+                  <TwinkleStar className="w-3 h-3" color="#FFFFFF" />
+                </div>
+              )}
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      {/* Main Spa Bathing Stage Canvas */}
-      <div className="relative w-full max-w-2xl h-[340px] sm:h-[380px] rounded-3xl border-4 border-pink-300 shadow-2xl bg-linear-to-b from-sky-100 via-pink-50 to-purple-100 overflow-hidden flex flex-col items-center justify-center p-4">
-        {/* Ambient Spa Bubbles */}
-        <div className="absolute inset-0 pointer-events-none flex justify-between p-6 opacity-30 text-3xl">
-          <span className="animate-bounce">🫧</span>
-          <span className="animate-pulse">✨</span>
-          <span className="animate-bounce">🫧</span>
-        </div>
-
-        {/* Golden Royal Bathtub */}
-        <div className="relative w-76 sm:w-84 h-36 sm:h-40 bg-linear-to-b from-amber-200 via-yellow-100 to-amber-300 rounded-b-[60px] border-4 border-white shadow-2xl flex flex-col items-center justify-start pt-2 mt-24">
-          {/* Bathtub Rim */}
-          <div className="w-84 sm:w-92 h-7 bg-linear-to-r from-amber-300 via-yellow-200 to-amber-300 rounded-full border-2 border-white shadow-md -mt-4" />
-
-          {/* Bath Water Level */}
-          <div className="w-72 sm:w-78 h-16 bg-sky-300/40 rounded-b-[40px] border-t-2 border-white flex items-center justify-around text-xl text-white">
-            <span>🫧</span>
-            <span>🫧</span>
-            <span>🫧</span>
-          </div>
-
-          {/* Tub Lion Paws / Feet */}
-          <div className="absolute -bottom-3 inset-x-8 flex justify-between">
-            <div className="w-6 h-4 bg-amber-400 rounded-full border border-amber-500 shadow-xs" />
-            <div className="w-6 h-4 bg-amber-400 rounded-full border border-amber-500 shadow-xs" />
-          </div>
-        </div>
-
-        {/* The Royal Pet in the Bathtub - Handcrafted Vector Illustration */}
-        <div
-          id="royal-pet-canvas"
-          className="absolute z-20 top-6 sm:top-8 flex flex-col items-center cursor-pointer"
-        >
-          {/* Happiness Hearts Overlay */}
-          {petHappiness && (
-            <div className="absolute -top-6 text-3xl animate-bounce text-rose-500 z-30 pointer-events-none">
-              💖 ✨ 💖
-            </div>
-          )}
-
-          {/* High Quality Cartoon Pet SVG */}
-          <CartoonPetGraphic
-            petId={currentPet.id}
-            isWashed={currentPet.isWashed}
-            isRinsed={currentPet.isRinsed}
-            isBrushed={currentPet.isBrushed}
-            isDry={currentPet.isDry}
-            bubbleCount={currentPet.bubbleCount}
-            happiness={petHappiness}
-            sparkling={isSparkling}
-            accessoryId={currentPet.accessoryId}
-            onClick={handlePetDirectTap}
-          />
-
-          {/* Pet Status Badge */}
-          <div className="mt-[-8px] z-30 bg-white/95 backdrop-blur-xs px-3.5 py-1 rounded-full border border-pink-200 text-xs font-black text-pink-700 shadow-md">
-            {currentPet.isBrushed
-              ? '✨ Sparkly, Fluffy & Crowned! ✨'
-              : currentPet.isDry
-              ? '💨 Fluffy & Warm! Ready to brush!'
-              : currentPet.isRinsed
-              ? '🚿 Fresh & Clean! Ready to dry!'
-              : currentPet.isWashed
-              ? '🫧 Squeaky Soapy! Ready to rinse!'
-              : 'Tap to start spa bath! 🌸'}
-          </div>
-        </div>
-
-        {/* Toddler Hint */}
-        <div className="absolute bottom-2 bg-white/80 backdrop-blur-xs px-3 py-1 rounded-full border border-pink-200 text-xs font-black text-pink-700 pointer-events-none">
-          👆 Tap tools below: Soap 🫧, Rinse 🚿, Dry 💨, and Brush ✨!
-        </div>
-      </div>
-
-      {/* Spa Grooming Action Tools (Chunky Giant Buttons) */}
-      <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs p-3 rounded-3xl border-2 border-pink-200 shadow-sm flex flex-col gap-3">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-black text-pink-700">1. Spa Care Steps:</span>
-          <span className="text-[11px] font-bold text-pink-500">Step by step royal salon!</span>
-        </div>
-
-        <div className="grid grid-cols-4 gap-2 w-full">
-          {/* Tool 1: Soap Sponge */}
-          <button
-            id="tool-spa-soap"
-            onClick={() => {
-              setActiveTool('soap');
-              handleApplySoap();
-            }}
-            className={`flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition cursor-pointer ${
-              activeTool === 'soap'
-                ? 'bg-linear-to-b from-pink-400 to-rose-500 text-white border-pink-300 shadow-md scale-102 ring-2 ring-pink-300'
-                : 'bg-pink-50 border-pink-200 text-pink-800 hover:bg-pink-100'
-            }`}
-          >
-            <span className="text-2xl sm:text-3xl animate-bounce">🧽</span>
-            <span className="text-[11px] sm:text-xs font-black mt-1">1. Soap 🫧</span>
-          </button>
-
-          {/* Tool 2: Shower Rinse */}
-          <button
-            id="tool-spa-rinse"
-            onClick={() => {
-              setActiveTool('rinse');
-              handleRinse();
-            }}
-            className={`flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition cursor-pointer ${
-              activeTool === 'rinse'
-                ? 'bg-linear-to-b from-sky-400 to-blue-500 text-white border-sky-300 shadow-md scale-102 ring-2 ring-sky-300'
-                : 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100'
-            }`}
-          >
-            <span className="text-2xl sm:text-3xl">🚿</span>
-            <span className="text-[11px] sm:text-xs font-black mt-1">2. Rinse 💧</span>
-          </button>
-
-          {/* Tool 3: Warm Dryer */}
-          <button
-            id="tool-spa-dryer"
-            onClick={() => {
-              setActiveTool('dry');
-              handleBlowDry();
-            }}
-            className={`flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition cursor-pointer ${
-              activeTool === 'dry'
-                ? 'bg-linear-to-b from-purple-400 to-indigo-500 text-white border-purple-300 shadow-md scale-102 ring-2 ring-purple-300'
-                : 'bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100'
-            }`}
-          >
-            <span className="text-2xl sm:text-3xl">💨</span>
-            <span className="text-[11px] sm:text-xs font-black mt-1">3. Dry ☁️</span>
-          </button>
-
-          {/* Tool 4: Magic Brush */}
-          <button
-            id="tool-spa-brush"
-            onClick={() => {
-              setActiveTool('brush');
-              handleBrush();
-            }}
-            className={`flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition cursor-pointer ${
-              activeTool === 'brush'
-                ? 'bg-linear-to-b from-amber-300 to-yellow-500 text-amber-950 border-yellow-300 shadow-md scale-102 ring-2 ring-yellow-300'
-                : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
-            }`}
-          >
-            <span className="text-2xl sm:text-3xl">🪮</span>
-            <span className="text-[11px] sm:text-xs font-black mt-1">4. Glow ✨</span>
-          </button>
-        </div>
-
-        {/* Tray 2: Dress Up Accessories */}
-        <div className="flex flex-col gap-1 pt-1 border-t border-pink-100">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-pink-700">2. Royal Tiara & Accessories:</span>
-            <button
-              id="btn-reset-spa-pet"
-              onClick={handleResetPet}
-              className="text-[11px] font-bold text-rose-600 hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              <RotateCcw className="w-3 h-3" />
-              Reset Pet
-            </button>
-          </div>
-
-          <div className="grid grid-cols-6 gap-2">
-            {PET_ACCESSORIES.map((acc) => (
+      {/* Tool Tray */}
+      <div className="flex flex-col items-center gap-2 w-full max-w-2xl">
+        <p className="text-xs font-bold text-[#4A3B5C]/70">Tap each tool to give {selectedPet.name} a spa treatment!</p>
+        <div className="flex items-center justify-center gap-3 sm:gap-4">
+          {STEPS.map((step) => {
+            const stepDone = doneSteps.has(step.id);
+            return (
               <button
-                key={acc.id}
-                id={`btn-pet-acc-${acc.id}`}
-                onClick={() => handleSelectAccessory(acc.id, acc.emoji)}
-                className={`flex flex-col items-center justify-center p-2 rounded-2xl border-2 transition cursor-pointer ${
-                  currentPet.accessoryId === acc.id
-                    ? 'bg-pink-100 border-pink-500 ring-2 ring-pink-300 scale-105'
-                    : 'bg-pink-50/70 border-pink-200 hover:bg-pink-100 active:scale-95'
+                key={step.id}
+                id={`spa-tool-${step.id}`}
+                onClick={() => handleApplyStep(step)}
+                className={`flex flex-col items-center gap-1 w-16 sm:w-20 p-2 rounded-2xl border-2 shadow-md transition active:scale-90 cursor-pointer ${
+                  stepDone ? 'bg-sky-50 border-sky-400 ring-2 ring-sky-200' : 'bg-white border-[#E3D6FF] hover:scale-105'
                 }`}
-                title={acc.name}
               >
-                <span className="text-2xl filter drop-shadow select-none">{acc.emoji}</span>
-                <span className="text-[10px] font-black text-pink-800 truncate w-full text-center mt-0.5">
-                  {acc.name}
-                </span>
+                <img src={step.src} alt="" className="w-10 h-10 sm:w-12 sm:h-12 object-contain" draggable={false} />
+                <span className="text-[11px] font-black text-[#4A3B5C]">{step.label}</span>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
+
+      {isSoapy && !isClean && (
+        <button
+          id="spa-reset"
+          onClick={handleResetPet}
+          className="text-xs font-bold text-sky-600 underline decoration-dotted cursor-pointer"
+        >
+          Start {selectedPet.name}'s bath over
+        </button>
+      )}
     </div>
   );
 };
