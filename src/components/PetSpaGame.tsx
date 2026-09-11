@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { playSound } from '../utils/audio';
 import { TwinkleStar } from './GameArt';
 
@@ -44,6 +45,8 @@ const SPARKLE_BURSTS = [
   'art/sparkle-burst-blue.png',
   'art/sparkle-burst-purple.png',
 ];
+
+const spring = { type: 'spring' as const, stiffness: 360, damping: 20 };
 
 export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
   const [selectedPetId, setSelectedPetId] = useState(PETS[0].id);
@@ -98,28 +101,36 @@ export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-3 select-none font-['Fredoka']">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-4 select-none">
       {/* Header */}
-      <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs px-4 py-2.5 rounded-3xl border-2 border-sky-200 shadow-sm flex items-center justify-between gap-2">
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={spring}
+        className="w-full max-w-2xl glass-strong glow-lavender px-5 py-3 rounded-[28px] flex items-center justify-between gap-2"
+      >
         <div>
-          <h3 className="text-base sm:text-lg font-black text-sky-800 leading-tight">Royal Pet Spa</h3>
-          <span className="text-xs font-bold text-sky-500">Soap, rinse, brush &amp; dry your furry friends!</span>
+          <h3 className="font-display italic text-lg sm:text-xl font-bold text-sky-800 leading-tight">Royal Pet Spa</h3>
+          <span className="text-xs font-bold text-sky-600/80">Soap, rinse, brush &amp; dry your furry friends!</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-sky-50 border-2 border-sky-200 rounded-full px-3 py-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 bg-white/70 rounded-full px-3 py-1.5 shrink-0">
           <TwinkleStar className="w-4 h-4" color="#38BDF8" />
           <span className="text-xs font-black text-sky-700">{cleanedCount}/{PETS.length}</span>
         </div>
-      </div>
+      </motion.div>
 
       {/* Spa Stage */}
-      <div
-        className="relative w-full max-w-2xl h-[340px] sm:h-[380px] rounded-3xl border-4 border-white shadow-2xl overflow-hidden flex items-end justify-center bg-cover bg-center"
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ ...spring, delay: 0.05 }}
+        className="relative w-full max-w-2xl h-[340px] sm:h-[380px] rounded-[40px] border-4 border-white/80 glow-pink overflow-hidden flex items-end justify-center bg-cover bg-center"
         style={{ backgroundImage: "url('art/spa-bg-bathroom.png')" }}
       >
         <div className="absolute inset-0 bg-white/10" />
 
         {/* Pet */}
-        <button
+        <motion.button
           id="spa-pet-stage"
           onClick={() => {
             if (isClean) {
@@ -128,9 +139,11 @@ export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
               playSound.tap();
             }
           }}
-          className={`relative z-10 mb-6 w-40 h-40 sm:w-48 sm:h-48 cursor-pointer transition-transform duration-300 ${
-            bounce ? 'scale-110' : 'hover:scale-105 active:scale-95'
-          }`}
+          animate={{ scale: bounce ? 1.12 : 1 }}
+          transition={spring}
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.94 }}
+          className="relative z-10 mb-6 w-40 h-40 sm:w-48 sm:h-48 cursor-pointer"
           title={selectedPet.name}
         >
           <img
@@ -148,28 +161,40 @@ export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
               className="absolute -inset-6 w-[calc(100%+3rem)] h-[calc(100%+3rem)] object-contain pointer-events-none animate-ping"
             />
           )}
-        </button>
+        </motion.button>
 
         {/* "Squeaky clean" badge */}
-        {isClean && (
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-white/95 px-3 py-1.5 rounded-full border-2 border-sky-300 shadow-md">
-            <TwinkleStar className="w-4 h-4" color="#38BDF8" />
-            <span className="text-xs font-black text-sky-800">Squeaky clean!</span>
-          </div>
-        )}
-      </div>
+        <AnimatePresence>
+          {isClean && (
+            <motion.div
+              initial={{ opacity: 0, y: -16, scale: 0.7 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.8 }}
+              transition={spring}
+              className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 glass-strong glow-gold px-3.5 py-1.5 rounded-full"
+            >
+              <TwinkleStar className="w-4 h-4" color="#38BDF8" />
+              <span className="text-xs font-black text-sky-800">Squeaky clean!</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {/* Pet Picker */}
       <div className="flex items-center gap-2.5 overflow-x-auto pb-1 px-1 w-full max-w-2xl justify-center scrollbar-none">
         {PETS.map((pet) => {
           const petClean = cleanedRef.current.has(pet.id);
           return (
-            <button
+            <motion.button
               key={pet.id}
               id={`spa-select-${pet.id}`}
               onClick={() => handleSelectPet(pet.id)}
-              className={`relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white p-1 border-2 transition active:scale-90 cursor-pointer ${
-                selectedPetId === pet.id ? 'border-sky-400 ring-4 ring-sky-200 scale-110' : 'border-[#E3D6FF]'
+              whileHover={{ y: -3, scale: 1.05 }}
+              whileTap={{ scale: 0.88 }}
+              animate={{ scale: selectedPetId === pet.id ? 1.1 : 1 }}
+              transition={spring}
+              className={`relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full glass p-1 cursor-pointer ${
+                selectedPetId === pet.id ? 'ring-4 ring-sky-300 glow-lavender' : ''
               }`}
               title={pet.name}
             >
@@ -179,43 +204,51 @@ export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
                   <TwinkleStar className="w-3 h-3" color="#FFFFFF" />
                 </div>
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>
 
       {/* Tool Tray */}
-      <div className="flex flex-col items-center gap-2 w-full max-w-2xl">
+      <div className="flex flex-col items-center gap-2.5 w-full max-w-2xl">
         <p className="text-xs font-bold text-[#4A3B5C]/70">Tap each tool to give {selectedPet.name} a spa treatment!</p>
         <div className="flex items-center justify-center gap-3 sm:gap-4">
           {STEPS.map((step) => {
             const stepDone = doneSteps.has(step.id);
             return (
-              <button
+              <motion.button
                 key={step.id}
                 id={`spa-tool-${step.id}`}
                 onClick={() => handleApplyStep(step)}
-                className={`flex flex-col items-center gap-1 w-16 sm:w-20 p-2 rounded-2xl border-2 shadow-md transition active:scale-90 cursor-pointer ${
-                  stepDone ? 'bg-sky-50 border-sky-400 ring-2 ring-sky-200' : 'bg-white border-[#E3D6FF] hover:scale-105'
+                whileHover={{ y: -4, scale: 1.06 }}
+                whileTap={{ scale: 0.88 }}
+                transition={spring}
+                className={`flex flex-col items-center gap-1 w-16 sm:w-20 p-2.5 rounded-[24px] cursor-pointer ${
+                  stepDone ? 'glass-strong glow-lavender ring-2 ring-sky-300' : 'glass hover:glow-pink'
                 }`}
               >
                 <img src={step.src} alt="" className="w-10 h-10 sm:w-12 sm:h-12 object-contain" draggable={false} />
                 <span className="text-[11px] font-black text-[#4A3B5C]">{step.label}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
       </div>
 
-      {isSoapy && !isClean && (
-        <button
-          id="spa-reset"
-          onClick={handleResetPet}
-          className="text-xs font-bold text-sky-600 underline decoration-dotted cursor-pointer"
-        >
-          Start {selectedPet.name}'s bath over
-        </button>
-      )}
+      <AnimatePresence>
+        {isSoapy && !isClean && (
+          <motion.button
+            id="spa-reset"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleResetPet}
+            className="text-xs font-bold text-sky-600 underline decoration-dotted cursor-pointer"
+          >
+            Start {selectedPet.name}'s bath over
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
