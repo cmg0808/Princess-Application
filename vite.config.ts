@@ -5,8 +5,8 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // Deployed as a GitHub Pages project site, so it's served from a subpath
-// (https://<user>.github.io/Toddler-Pop-It/) rather than a domain root.
-const BASE_PATH = '/Toddler-Pop-It/';
+// (https://<user>.github.io/Princess-Application/) rather than a domain root.
+const BASE_PATH = '/Princess-Application/';
 
 export default defineConfig(() => {
   return {
