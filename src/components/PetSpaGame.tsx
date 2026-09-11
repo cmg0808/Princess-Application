@@ -14,12 +14,12 @@ interface PetDef {
 }
 
 const PETS: PetDef[] = [
-  { id: 'dog', name: 'Puppy', before: '/art/pet-dog-before.png', soapy: '/art/pet-dog-soapy.png' },
-  { id: 'cat', name: 'Kitten', before: '/art/pet-cat-before.png', soapy: '/art/pet-cat-soapy.png' },
-  { id: 'bunny', name: 'Bunny', before: '/art/pet-bunny-before.png', soapy: '/art/pet-bunny-soapy.png' },
-  { id: 'lamb', name: 'Lamb', before: '/art/pet-lamb-before.png', soapy: '/art/pet-lamb-soapy.png' },
-  { id: 'guinea', name: 'Guinea Pig', before: '/art/pet-guinea-before.png', soapy: '/art/pet-guinea-soapy.png' },
-  { id: 'duck', name: 'Duckling', before: '/art/pet-duck-before.png', soapy: '/art/pet-duck-soapy.png' },
+  { id: 'dog', name: 'Puppy', before: 'art/pet-dog-before.png', soapy: 'art/pet-dog-soapy.png' },
+  { id: 'cat', name: 'Kitten', before: 'art/pet-cat-before.png', soapy: 'art/pet-cat-soapy.png' },
+  { id: 'bunny', name: 'Bunny', before: 'art/pet-bunny-before.png', soapy: 'art/pet-bunny-soapy.png' },
+  { id: 'lamb', name: 'Lamb', before: 'art/pet-lamb-before.png', soapy: 'art/pet-lamb-soapy.png' },
+  { id: 'guinea', name: 'Guinea Pig', before: 'art/pet-guinea-before.png', soapy: 'art/pet-guinea-soapy.png' },
+  { id: 'duck', name: 'Duckling', before: 'art/pet-duck-before.png', soapy: 'art/pet-duck-soapy.png' },
 ];
 
 type StepId = 'wash' | 'rinse' | 'brush' | 'dry';
@@ -32,17 +32,17 @@ interface StepDef {
 }
 
 const STEPS: StepDef[] = [
-  { id: 'wash', label: 'Soap', src: '/art/spa-sponge.png', sound: () => playSound.splashWater() },
-  { id: 'rinse', label: 'Rinse', src: '/art/spa-droplets.png', sound: () => playSound.splash() },
-  { id: 'brush', label: 'Brush', src: '/art/spa-hairbrush.png', sound: () => playSound.brushStroke() },
-  { id: 'dry', label: 'Dry', src: '/art/spa-hairdryer.png', sound: () => playSound.chime() },
+  { id: 'wash', label: 'Soap', src: 'art/spa-sponge.png', sound: () => playSound.splashWater() },
+  { id: 'rinse', label: 'Rinse', src: 'art/spa-droplets.png', sound: () => playSound.splash() },
+  { id: 'brush', label: 'Brush', src: 'art/spa-hairbrush.png', sound: () => playSound.brushStroke() },
+  { id: 'dry', label: 'Dry', src: 'art/spa-hairdryer.png', sound: () => playSound.chime() },
 ];
 
 const SPARKLE_BURSTS = [
-  '/art/sparkle-burst-pink.png',
-  '/art/sparkle-burst-yellow.png',
-  '/art/sparkle-burst-blue.png',
-  '/art/sparkle-burst-purple.png',
+  'art/sparkle-burst-pink.png',
+  'art/sparkle-burst-yellow.png',
+  'art/sparkle-burst-blue.png',
+  'art/sparkle-burst-purple.png',
 ];
 
 export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
@@ -114,7 +114,7 @@ export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
       {/* Spa Stage */}
       <div
         className="relative w-full max-w-2xl h-[340px] sm:h-[380px] rounded-3xl border-4 border-white shadow-2xl overflow-hidden flex items-end justify-center bg-cover bg-center"
-        style={{ backgroundImage: "url('/art/spa-bg-bathroom.png')" }}
+        style={{ backgroundImage: "url('art/spa-bg-bathroom.png')" }}
       >
         <div className="absolute inset-0 bg-white/10" />
 

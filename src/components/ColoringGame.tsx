@@ -26,10 +26,10 @@ interface SparkleParticle {
 }
 
 const SPARKLE_IMAGE_SRCS = [
-  '/art/sparkle-burst-pink.png',
-  '/art/sparkle-burst-yellow.png',
-  '/art/sparkle-burst-blue.png',
-  '/art/sparkle-burst-purple.png',
+  'art/sparkle-burst-pink.png',
+  'art/sparkle-burst-yellow.png',
+  'art/sparkle-burst-blue.png',
+  'art/sparkle-burst-purple.png',
 ];
 
 // A fully "solved" color map for a page, used for its small preview thumbnail.
@@ -371,7 +371,7 @@ export const ColoringGame: React.FC<ColoringGameProps> = ({
           style={{ willChange: 'transform' }}
         >
           <img
-            src="/art/wand-sparkle.png"
+            src="art/wand-sparkle.png"
             alt=""
             className="w-16 h-16 object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,0.25)]"
             draggable={false}

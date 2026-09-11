@@ -17,9 +17,9 @@ interface TeaPartyGuest {
 }
 
 const INITIAL_GUESTS: TeaPartyGuest[] = [
-  { id: 'princess-lily', name: 'Princess Lily', portrait: '/art/guest-princess.png', hasTea: false, hasCupcake: false, happyReaction: false },
-  { id: 'twinkle-bunny', name: 'Twinkle Bunny', portrait: '/art/guest-bunny.png', hasTea: false, hasCupcake: false, happyReaction: false },
-  { id: 'pippin-frog', name: 'Prince Pippin', portrait: '/art/guest-frog.png', hasTea: false, hasCupcake: false, happyReaction: false },
+  { id: 'princess-lily', name: 'Princess Lily', portrait: 'art/guest-princess.png', hasTea: false, hasCupcake: false, happyReaction: false },
+  { id: 'twinkle-bunny', name: 'Twinkle Bunny', portrait: 'art/guest-bunny.png', hasTea: false, hasCupcake: false, happyReaction: false },
+  { id: 'pippin-frog', name: 'Prince Pippin', portrait: 'art/guest-frog.png', hasTea: false, hasCupcake: false, happyReaction: false },
 ];
 
 export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
@@ -81,7 +81,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
     <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-3 select-none font-['Fredoka']">
       {/* Header */}
       <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs px-4 py-2.5 rounded-3xl border-2 border-pink-200 shadow-sm flex items-center gap-2">
-        <img src="/art/teapot.png" alt="" className="w-10 h-10 shrink-0 object-contain" />
+        <img src="art/teapot.png" alt="" className="w-10 h-10 shrink-0 object-contain" />
         <div>
           <h3 className="text-base sm:text-lg font-black text-pink-800 leading-tight">
             Royal Tea Party
@@ -98,10 +98,10 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
         <div className="absolute inset-x-8 bottom-4 h-40 bg-white/90 rounded-3xl border-3 border-pink-200 shadow-lg flex flex-col items-center justify-center pointer-events-none">
           <div className="w-full h-4 bg-pink-300/40" />
           <div className="flex items-center gap-4 my-auto opacity-70">
-            <img src="/art/cookie-heart.png" alt="" className="w-7 h-7 object-contain" />
-            <img src="/art/teapot.png" alt="" className="w-9 h-9 object-contain" />
-            <img src="/art/cupcake.png" alt="" className="w-7 h-7 object-contain" />
-            <img src="/art/cookie-round.png" alt="" className="w-7 h-7 object-contain" />
+            <img src="art/cookie-heart.png" alt="" className="w-7 h-7 object-contain" />
+            <img src="art/teapot.png" alt="" className="w-9 h-9 object-contain" />
+            <img src="art/cupcake.png" alt="" className="w-7 h-7 object-contain" />
+            <img src="art/cookie-round.png" alt="" className="w-7 h-7 object-contain" />
           </div>
           <div className="w-full h-4 bg-pink-300/40" />
         </div>
@@ -147,7 +147,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
                     aria-label={`Pour tea for ${guest.name}`}
                   >
                     <img
-                      src="/art/teacup.png"
+                      src="art/teacup.png"
                       alt=""
                       className={`w-full h-full object-contain transition-all duration-300 ${
                         guest.hasTea ? 'opacity-100' : 'opacity-30 grayscale'
@@ -163,7 +163,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
                     aria-label={`Feed cupcake to ${guest.name}`}
                   >
                     <img
-                      src="/art/cupcake.png"
+                      src="art/cupcake.png"
                       alt=""
                       className={`w-full h-full object-contain transition-all duration-300 ${
                         guest.hasCupcake ? 'opacity-100' : 'opacity-30 grayscale'
@@ -175,7 +175,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
                 {/* Pouring Teapot Animation */}
                 {isPouring && (
                   <div className="absolute -top-5 right-0 animate-bounce z-30">
-                    <img src="/art/teapot.png" alt="" className="w-8 h-8 object-contain" />
+                    <img src="art/teapot.png" alt="" className="w-8 h-8 object-contain" />
                   </div>
                 )}
               </div>
@@ -200,7 +200,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
           }}
           className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-linear-to-b from-amber-400 to-yellow-500 text-amber-950 font-black text-xs sm:text-sm shadow-md hover:scale-102 active:scale-95 transition cursor-pointer border-2 border-yellow-300"
         >
-          <img src="/art/teapot.png" alt="" className="w-6 h-6 object-contain" />
+          <img src="art/teapot.png" alt="" className="w-6 h-6 object-contain" />
           <span>Pour Tea for All!</span>
         </button>
 
@@ -213,7 +213,7 @@ export const TeaPartyGame: React.FC<TeaPartyGameProps> = ({ onReward }) => {
           }}
           className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-linear-to-b from-pink-400 to-rose-500 text-white font-black text-xs sm:text-sm shadow-md hover:scale-102 active:scale-95 transition cursor-pointer border-2 border-pink-300"
         >
-          <img src="/art/cupcake.png" alt="" className="w-6 h-6 object-contain" />
+          <img src="art/cupcake.png" alt="" className="w-6 h-6 object-contain" />
           <span>Feed Cupcakes!</span>
         </button>
 

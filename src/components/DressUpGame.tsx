@@ -14,16 +14,16 @@ interface DressUpItem {
   src: string;
 }
 
-const TIARAS: DressUpItem[] = [{ id: 'gold_heart', name: 'Golden Heart Tiara', src: '/art/tiara.png' }];
+const TIARAS: DressUpItem[] = [{ id: 'gold_heart', name: 'Golden Heart Tiara', src: 'art/tiara.png' }];
 
 const GOWNS: DressUpItem[] = [
-  { id: 'purple', name: 'Purple Ballgown', src: '/art/gown-purple.png' },
-  { id: 'pink', name: 'Pink Ballgown', src: '/art/gown-pink.png' },
+  { id: 'purple', name: 'Purple Ballgown', src: 'art/gown-purple.png' },
+  { id: 'pink', name: 'Pink Ballgown', src: 'art/gown-pink.png' },
 ];
 
 const SHOES: DressUpItem[] = [
-  { id: 'ballet_pink', name: 'Pink Ballet Flats', src: '/art/shoes-ballet-pink.png' },
-  { id: 'glass_blue', name: 'Glass Slippers', src: '/art/shoes-heels-blue.png' },
+  { id: 'ballet_pink', name: 'Pink Ballet Flats', src: 'art/shoes-ballet-pink.png' },
+  { id: 'glass_blue', name: 'Glass Slippers', src: 'art/shoes-heels-blue.png' },
 ];
 
 interface FlightState {
@@ -175,7 +175,7 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
         >
           {/* Base character */}
           <img
-            src="/art/doll-base-body.png"
+            src="art/doll-base-body.png"
             alt="Princess"
             className="absolute inset-x-0 top-0 mx-auto h-full object-contain select-none pointer-events-none"
             draggable={false}
@@ -193,7 +193,7 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
             {tiara ? (
               <img src={tiara.src} alt={tiara.name} className="w-full h-full object-contain drop-shadow-md" draggable={false} />
             ) : (
-              <img src="/art/placeholder-head.png" alt="" className="w-full h-full object-contain opacity-60 animate-pulse" draggable={false} />
+              <img src="art/placeholder-head.png" alt="" className="w-full h-full object-contain opacity-60 animate-pulse" draggable={false} />
             )}
           </div>
 
@@ -209,7 +209,7 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
             {dress ? (
               <img src={dress.src} alt={dress.name} className="w-full h-full object-contain drop-shadow-md" draggable={false} />
             ) : (
-              <img src="/art/placeholder-body.png" alt="" className="w-full h-full object-contain opacity-50 animate-pulse" draggable={false} />
+              <img src="art/placeholder-body.png" alt="" className="w-full h-full object-contain opacity-50 animate-pulse" draggable={false} />
             )}
           </div>
 
@@ -225,7 +225,7 @@ export const DressUpGame: React.FC<DressUpGameProps> = ({ onReward }) => {
             {shoes ? (
               <img src={shoes.src} alt={shoes.name} className="w-full h-full object-contain drop-shadow-md" draggable={false} />
             ) : (
-              <img src="/art/placeholder-shoes.png" alt="" className="w-full h-full object-contain opacity-60 animate-pulse" draggable={false} />
+              <img src="art/placeholder-shoes.png" alt="" className="w-full h-full object-contain opacity-60 animate-pulse" draggable={false} />
             )}
           </div>
         </div>

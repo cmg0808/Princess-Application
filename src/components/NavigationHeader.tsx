@@ -59,27 +59,27 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
   const getModeInfo = () => {
     switch (currentMode) {
       case 'teaparty':
-        return { icon: <img src="/art/icon-teaparty.png" alt="" className="w-7 h-7 object-contain" />, title: 'Tea Party' };
+        return { icon: <img src="art/icon-teaparty.png" alt="" className="w-7 h-7 object-contain" />, title: 'Tea Party' };
       case 'petspa':
-        return { icon: <img src="/art/icon-petshop.png" alt="" className="w-7 h-7 object-contain" />, title: 'Pet Spa' };
+        return { icon: <img src="art/icon-petshop.png" alt="" className="w-7 h-7 object-contain" />, title: 'Pet Spa' };
       case 'magicwand':
         return { icon: <CartoonMagicWandIcon className="w-6 h-6" />, title: 'Magic Wand' };
       case 'shapesorter':
-        return { icon: <img src="/art/icon-shapes.png" alt="" className="w-7 h-7 object-contain" />, title: 'Shapes' };
+        return { icon: <img src="art/icon-shapes.png" alt="" className="w-7 h-7 object-contain" />, title: 'Shapes' };
       case 'royalball':
         return { icon: <CartoonBallIcon className="w-6 h-6" />, title: 'Dance Ball' };
       case 'storybook':
         return { icon: <CartoonBookIcon className="w-6 h-6" />, title: 'Story' };
       case 'crowndecorator':
-        return { icon: <img src="/art/icon-crown.png" alt="" className="w-7 h-7 object-contain" />, title: 'Crowns' };
+        return { icon: <img src="art/icon-crown.png" alt="" className="w-7 h-7 object-contain" />, title: 'Crowns' };
       case 'coloring':
-        return { icon: <img src="/art/icon-coloring.png" alt="" className="w-7 h-7 object-contain" />, title: 'Color' };
+        return { icon: <img src="art/icon-coloring.png" alt="" className="w-7 h-7 object-contain" />, title: 'Color' };
       case 'dressup':
-        return { icon: <img src="/art/icon-dressup.png" alt="" className="w-7 h-7 object-contain" />, title: 'Dress Up' };
+        return { icon: <img src="art/icon-dressup.png" alt="" className="w-7 h-7 object-contain" />, title: 'Dress Up' };
       case 'matching':
         return { icon: <CartoonPuzzleIcon className="w-6 h-6" />, title: 'Puzzles' };
       case 'bubblepop':
-        return { icon: <img src="/art/icon-bubbles.png" alt="" className="w-7 h-7 object-contain" />, title: 'Bubbles' };
+        return { icon: <img src="art/icon-bubbles.png" alt="" className="w-7 h-7 object-contain" />, title: 'Bubbles' };
       case 'music':
         return { icon: <CartoonMusicIcon className="w-6 h-6" />, title: 'Music' };
       case 'stickers':
@@ -137,7 +137,7 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
 
           {/* Stars badge */}
           <div className="flex items-center gap-1.5 bg-[#FFF1C2] px-2.5 py-1 rounded-full border border-yellow-300 text-xs font-['Baloo_2'] font-extrabold text-[#7A5B0B] shadow-2xs">
-            <img src="/art/icon-star.png" alt="" className="w-4 h-4 object-contain" />
+            <img src="art/icon-star.png" alt="" className="w-4 h-4 object-contain" />
             <span>{starsCount}</span>
           </div>
 

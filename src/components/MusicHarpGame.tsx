@@ -16,11 +16,11 @@ interface GemKey {
 // A pentatonic scale (no "wrong-sounding" combination) mapped one-to-one to
 // the five illustrated gem keys, so every tap sounds pleasant.
 const GEM_KEYS: GemKey[] = [
-  { note: 'C4', freq: 261.63, src: '/art/gem-key-pink.png', glow: 'rgba(244,63,94,0.55)' },
-  { note: 'D4', freq: 293.66, src: '/art/gem-key-yellow.png', glow: 'rgba(250,204,21,0.55)' },
-  { note: 'E4', freq: 329.63, src: '/art/gem-key-green.png', glow: 'rgba(52,211,153,0.55)' },
-  { note: 'G4', freq: 392.0, src: '/art/gem-key-blue.png', glow: 'rgba(56,189,248,0.55)' },
-  { note: 'A4', freq: 440.0, src: '/art/gem-key-purple.png', glow: 'rgba(168,85,247,0.55)' },
+  { note: 'C4', freq: 261.63, src: 'art/gem-key-pink.png', glow: 'rgba(244,63,94,0.55)' },
+  { note: 'D4', freq: 293.66, src: 'art/gem-key-yellow.png', glow: 'rgba(250,204,21,0.55)' },
+  { note: 'E4', freq: 329.63, src: 'art/gem-key-green.png', glow: 'rgba(52,211,153,0.55)' },
+  { note: 'G4', freq: 392.0, src: 'art/gem-key-blue.png', glow: 'rgba(56,189,248,0.55)' },
+  { note: 'A4', freq: 440.0, src: 'art/gem-key-purple.png', glow: 'rgba(168,85,247,0.55)' },
 ];
 
 export const MusicHarpGame: React.FC<MusicHarpGameProps> = ({ onReward }) => {

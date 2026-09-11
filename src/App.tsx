@@ -249,7 +249,7 @@ export default function App() {
                   className="w-[50px] h-[50px] rounded-[18px] bg-white/95 border-2 border-[#E3D6FF] hover:bg-[#FFD6E8] flex items-center justify-center text-[#6E5FA6] active:scale-95 transition cursor-pointer shadow-2xs"
                   title="Return to Playroom"
                 >
-                  <img src="/art/icon-home.png" alt="" className="w-8 h-8 object-contain" />
+                  <img src="art/icon-home.png" alt="" className="w-8 h-8 object-contain" />
                 </button>
 
                 <button
@@ -265,7 +265,7 @@ export default function App() {
                   }`}
                   title="Stickers"
                 >
-                  <img src="/art/icon-star.png" alt="" className="w-7 h-7 object-contain" />
+                  <img src="art/icon-star.png" alt="" className="w-7 h-7 object-contain" />
                 </button>
 
                 <button

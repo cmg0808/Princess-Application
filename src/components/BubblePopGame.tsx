@@ -18,18 +18,18 @@ interface Particle {
 // bubble" pictures — carriages, crowns, a frog prince, a magic wand and a
 // fairytale castle, all floating up for a toddler to pop.
 const BUBBLE_SRC: Record<Bubble['type'], string> = {
-  crown: '/art/bubble-crown.png',
-  carriage: '/art/bubble-carriage.png',
-  frog: '/art/bubble-frog.png',
-  wand: '/art/bubble-wand.png',
-  castle: '/art/bubble-castle.png',
+  crown: 'art/bubble-crown.png',
+  carriage: 'art/bubble-carriage.png',
+  frog: 'art/bubble-frog.png',
+  wand: 'art/bubble-wand.png',
+  castle: 'art/bubble-castle.png',
 };
 
 const SPARKLE_BURSTS = [
-  '/art/sparkle-burst-pink.png',
-  '/art/sparkle-burst-yellow.png',
-  '/art/sparkle-burst-blue.png',
-  '/art/sparkle-burst-purple.png',
+  'art/sparkle-burst-pink.png',
+  'art/sparkle-burst-yellow.png',
+  'art/sparkle-burst-blue.png',
+  'art/sparkle-burst-purple.png',
 ];
 
 const BUBBLE_TYPES: Bubble['type'][] = ['crown', 'carriage', 'frog', 'wand', 'castle'];
