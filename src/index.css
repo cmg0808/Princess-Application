@@ -7,18 +7,77 @@
   --butter: #FFF1C2;
   --hot: #FF6FA5;
   --ink: #4A3B5C;
+
+  /* Magical glass + glow design tokens */
+  --glass-bg: rgba(255, 255, 255, 0.52);
+  --glass-bg-strong: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glow-pink: rgba(255, 111, 165, 0.38);
+  --glow-gold: rgba(250, 204, 21, 0.4);
+  --glow-lavender: rgba(138, 111, 224, 0.32);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @layer base {
   html, body {
-    font-family: 'Nunito', 'Fredoka', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Quicksand', 'Nunito', 'Fredoka', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
+    /* Soft pastel gradient mesh — several overlapping radial glows over a
+       gentle diagonal base, instead of one flat linear gradient. Fixed so
+       the mesh doesn't reflow while scrolling any inner container. */
+    background-color: #FFF6FB;
+    background-image:
+      radial-gradient(38% 32% at 12% 8%, rgba(255, 214, 232, 0.85) 0%, rgba(255, 214, 232, 0) 100%),
+      radial-gradient(42% 38% at 92% 12%, rgba(227, 214, 255, 0.75) 0%, rgba(227, 214, 255, 0) 100%),
+      radial-gradient(46% 40% at 85% 88%, rgba(255, 241, 194, 0.8) 0%, rgba(255, 241, 194, 0) 100%),
+      radial-gradient(40% 36% at 8% 92%, rgba(212, 245, 233, 0.8) 0%, rgba(212, 245, 233, 0) 100%),
+      radial-gradient(60% 50% at 50% 50%, rgba(255, 240, 245, 0.6) 0%, rgba(255, 240, 245, 0) 100%),
+      linear-gradient(160deg, #F3E9FF 0%, #FFE9F3 45%, #FFF8E3 100%);
+    background-attachment: fixed;
   }
+}
+
+/* ==========================================================================
+   Glassmorphism & Magical Glow Utilities
+   ========================================================================== */
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-border);
+}
+
+.glow-pink {
+  box-shadow: 0 20px 50px -12px var(--glow-pink), 0 6px 18px -6px var(--glow-pink);
+}
+
+.glow-gold {
+  box-shadow: 0 20px 50px -12px var(--glow-gold), 0 6px 18px -6px var(--glow-gold);
+}
+
+.glow-lavender {
+  box-shadow: 0 20px 50px -12px var(--glow-lavender), 0 6px 18px -6px var(--glow-lavender);
+}
+
+.font-script {
+  font-family: 'Parisienne', cursive;
+}
+
+.font-display {
+  font-family: 'Playfair Display', serif;
 }
 
 @keyframes floatHero {

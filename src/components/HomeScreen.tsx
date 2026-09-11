@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Maximize, Minimize } from 'lucide-react';
+import React from 'react';
+import { motion } from 'motion/react';
 import { GameMode } from '../types';
 import { playSound } from '../utils/audio';
+import { PWAInstallButton } from './PWAInstallButton';
 import {
   CartoonBookIcon,
   CartoonMusicIcon,
   CartoonPuzzleIcon,
   CartoonMagicWandIcon,
   CartoonBallIcon,
-  CartoonCrownIcon,
   CartoonStickerStarIcon,
-  CartoonGiftIcon,
-  CartoonSoundIcon,
   CartoonHeroCrown,
   CartoonGalleryIcon,
 } from './CartoonIcons';
@@ -22,9 +20,6 @@ interface HomeScreenProps {
   totalStickerCount: number;
   onOpenGift: () => void;
   canOpenGift: boolean;
-  isMuted: boolean;
-  onToggleSound: () => void;
-  starsCount: number;
 }
 
 interface CandyBubble {
@@ -42,31 +37,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   totalStickerCount,
   onOpenGift,
   canOpenGift,
-  isMuted,
-  onToggleSound,
-  starsCount,
 }) => {
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  const toggleFullscreen = () => {
-    playSound.tap();
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      }
-    }
-  };
-
   const bubbles: CandyBubble[] = [
     {
       mode: 'storybook',
@@ -183,7 +154,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   ];
 
   return (
-    <div className="w-full min-h-screen flex flex-col justify-between p-3 sm:p-6 md:p-8 select-none font-['Nunito'] relative max-w-7xl mx-auto">
+    <div className="w-full flex flex-col gap-2 p-3 sm:p-6 md:p-8 select-none relative max-w-7xl mx-auto">
       {/* Decorative Floaty Background Blobs positioned across screen */}
       <div
         className="absolute rounded-full opacity-45 filter blur-[2px] pointer-events-none w-[180px] h-[180px] sm:w-[280px] sm:h-[280px] bg-[#D4F5E9] -top-[40px] -left-[40px]"
@@ -202,166 +173,91 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         aria-hidden="true"
       />
 
-      {/* Top Bar: Gate Lock / Sound / Stars / Fullscreen / Avatar */}
-      <div className="flex justify-between items-center w-full relative z-10 px-2 sm:px-4 pt-1">
-        {/* Gate / Parent Lock & Sound Toggle */}
-        <button
-          id="btn-gate-sound"
-          onClick={() => {
-            playSound.tap();
-            onToggleSound();
-          }}
-          className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-sm border-2 border-[#E3D6FF] flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shadow-[0_4px_12px_rgba(227,214,255,0.4)]"
-          title={isMuted ? 'Turn Sound ON' : 'Mute Sound'}
-          aria-label={isMuted ? 'Turn Sound ON' : 'Mute Sound'}
-        >
-          <CartoonSoundIcon isMuted={isMuted} className="w-6 h-6" />
-        </button>
+      {/* Floating "install for offline play" chip */}
+      <div
+        className="fixed z-30 top-3 right-3 sm:top-5 sm:right-5"
+        style={{ paddingTop: 'max(0px, env(safe-area-inset-top))' }}
+      >
+        <PWAInstallButton />
+      </div>
 
-        {/* Middle: Stars Reward Counter Pill */}
-        <button
-          id="btn-star-gift"
-          onClick={() => {
-            playSound.sparkle();
-            onOpenGift();
-          }}
-          className="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full border-2 border-yellow-300 text-sm sm:text-base font-['Baloo_2'] font-extrabold text-[#7A5B0B] hover:scale-105 active:scale-95 transition cursor-pointer shadow-[0_4px_16px_rgba(255,241,194,0.7)]"
-          title="Tap to open surprise gift!"
-        >
-          <img src="art/icon-star.png" alt="" className="w-5 h-5 sm:w-6 sm:h-6 object-contain" draggable={false} />
-          <span>{starsCount}</span>
-          <span className="text-xs text-[#A67E14]">({unlockedStickerCount}/{totalStickerCount})</span>
-        </button>
+      {/* Hero Area — the crown badge deliberately overlaps/breaks out of its
+          own glass plaque for a "pop-up storybook" feel instead of sitting
+          neatly boxed inside it. */}
+      <motion.div
+        initial={{ opacity: 0, y: -18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+        className="text-center mt-6 sm:mt-8 mb-2 relative z-10"
+      >
+        <div className="relative w-fit mx-auto">
+          <div className="glass-strong glow-lavender rounded-[42px] px-8 sm:px-12 pt-12 pb-5 sm:pt-14 sm:pb-6">
+            <h1 className="font-script text-5xl sm:text-7xl text-[#FF6FA5] m-0 leading-none">
+              Sparkle Town
+            </h1>
+            <p className="font-display italic font-semibold text-[#6E5FA6] text-base sm:text-lg mt-2">
+              Pick something fun!
+            </p>
+            {totalStickerCount > 0 && (
+              <p className="text-xs font-bold text-[#A67E14] mt-1.5">
+                {unlockedStickerCount}/{totalStickerCount} stickers found
+              </p>
+            )}
+          </div>
 
-        {/* Right: Fullscreen Toggle & Sticker Album Avatar */}
-        <div className="flex items-center gap-2">
-          <button
-            id="btn-fullscreen-home"
-            onClick={toggleFullscreen}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-sm border-2 border-[#FFF1C2] flex items-center justify-center text-[#7A5B0B] hover:scale-110 active:scale-95 transition cursor-pointer shadow-[0_4px_12px_rgba(255,241,194,0.5)]"
-            title={isFullscreen ? 'Exit Full Screen' : 'Go Full Screen'}
-            aria-label={isFullscreen ? 'Exit Full Screen' : 'Go Full Screen'}
-          >
-            {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-          </button>
-
-          <button
-            id="btn-avatar-stickers"
+          {/* Crown badge — popping out above the plaque, overlapping its edge */}
+          <motion.button
+            id="btn-hero-gift"
             onClick={() => {
               playSound.sparkle();
-              onSelectMode('stickers');
+              onOpenGift();
             }}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/90 border-2 border-[#FFD6E8] flex items-center justify-center shadow-[0_6px_16px_rgba(255,111,165,0.3)] hover:scale-110 active:scale-95 transition cursor-pointer"
-            title="View Sticker Album"
-            aria-label="View Sticker Album"
+            disabled={!canOpenGift}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+            className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-linear-to-br from-[#FFD6E8] via-[#FFF1C2] to-[#E3D6FF] flex items-center justify-center glow-pink animate-float-hero cursor-pointer border-4 border-white"
+            title="Sparkle Town!"
           >
-            <CartoonCrownIcon className="w-6 h-6 sm:w-7 sm:h-7" />
-          </button>
+            <CartoonHeroCrown className="w-16 h-16 sm:w-20 sm:h-20" />
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Hero Area */}
-      <div className="text-center my-3 sm:my-5 relative z-10">
-        <div
-          onClick={() => {
-            playSound.sparkle();
-            onOpenGift();
-          }}
-          className="w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-2.5 rounded-full bg-linear-to-br from-[#FFD6E8] via-[#FFF1C2] to-[#E3D6FF] flex items-center justify-center shadow-[0_12px_28px_rgba(255,111,165,0.4)] animate-float-hero cursor-pointer active:scale-95 transition border-4 border-white"
-          title="Sparkle Town!"
-        >
-          <CartoonHeroCrown className="w-16 h-16 sm:w-20 sm:h-20" />
-        </div>
-
-        <h1 className="font-['Baloo_2'] font-extrabold text-3xl sm:text-5xl text-[#FF6FA5] m-0 leading-tight drop-shadow-xs">
-          Sparkle Town
-        </h1>
-        <p className="font-bold text-[#4A3B5C] opacity-75 text-base sm:text-lg mt-1">
-          Pick something fun!
-        </p>
-      </div>
-
-      {/* Bubbles Grid - Full Screen Responsive Layout */}
+      {/* Bubbles Grid - Full Screen Responsive Layout, springing in staggered */}
       <div className="w-full max-w-5xl mx-auto flex-1 flex items-center justify-center relative z-10 px-2 my-2">
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3 sm:gap-4 md:gap-5 justify-items-center w-full py-2">
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: {},
+            show: { transition: { staggerChildren: 0.045, delayChildren: 0.1 } },
+          }}
+          className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3 sm:gap-4 md:gap-5 justify-items-center w-full py-2"
+        >
           {bubbles.map((b) => (
-            <button
+            <motion.button
               key={b.mode}
               id={`bubble-btn-${b.mode}`}
               onClick={() => {
                 playSound.pop();
                 onSelectMode(b.mode);
               }}
-              style={{ animationDelay: b.animDelay }}
-              className={`w-[96px] h-[96px] sm:w-[108px] sm:h-[108px] md:w-[118px] md:h-[118px] ${b.shapeClass} ${b.bgClass} flex flex-col items-center justify-center gap-1 sm:gap-1.5 font-['Baloo_2'] font-bold text-[13px] sm:text-[14px] text-[#4A3B5C] shadow-[0_10px_22px_rgba(74,59,92,0.12)] hover:scale-110 active:scale-90 transition-all duration-200 cursor-pointer text-center p-2 animate-[popBubble_0.4s_ease_backwards]`}
+              variants={{
+                hidden: { opacity: 0, y: 22, scale: 0.6 },
+                show: { opacity: 1, y: 0, scale: 1 },
+              }}
+              transition={{ type: 'spring', stiffness: 340, damping: 18 }}
+              whileHover={{ scale: 1.1, y: -4 }}
+              whileTap={{ scale: 0.9 }}
+              className={`w-[96px] h-[96px] sm:w-[108px] sm:h-[108px] md:w-[118px] md:h-[118px] ${b.shapeClass} ${b.bgClass} flex flex-col items-center justify-center gap-1 sm:gap-1.5 font-['Baloo_2'] font-bold text-[13px] sm:text-[14px] text-[#4A3B5C] shadow-[0_10px_22px_rgba(74,59,92,0.12)] cursor-pointer text-center p-2`}
             >
               <div className="pointer-events-none scale-105 sm:scale-115">{b.icon}</div>
               <span className="leading-tight pointer-events-none truncate w-full px-1">{b.label}</span>
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
       </div>
-
-      {/* Bottom Dock */}
-      <div className="flex justify-center items-center gap-4 sm:gap-6 mt-4 relative z-10 pb-2">
-        {/* Dock Item 1: Home (Active) */}
-        <button
-          id="dock-home"
-          onClick={() => {
-            playSound.tap();
-            onSelectMode('home');
-          }}
-          className="w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] rounded-[20px] bg-white/95 backdrop-blur-sm border-2 border-[#FF6FA5] flex items-center justify-center shadow-[0_6px_16px_rgba(255,111,165,0.35)] cursor-pointer hover:scale-105 active:scale-95 transition"
-          title="Home"
-          aria-label="Home"
-        >
-          <img src="art/icon-home.png" alt="" className="w-8 h-8 sm:w-9 sm:h-9 object-contain" draggable={false} />
-        </button>
-
-        {/* Dock Item 2: Stickers / Favorites */}
-        <button
-          id="dock-stickers"
-          onClick={() => {
-            playSound.sparkle();
-            onSelectMode('stickers');
-          }}
-          className="w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] rounded-[20px] bg-white/90 backdrop-blur-sm border-2 border-[#E3D6FF] flex items-center justify-center hover:bg-[#EDE5FF] active:scale-95 transition cursor-pointer shadow-[0_4px_12px_rgba(227,214,255,0.3)]"
-          title="Stickers"
-          aria-label="Stickers"
-        >
-          <img src="art/icon-star.png" alt="" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" draggable={false} />
-        </button>
-
-        {/* Dock Item 3: Royal Surprise Present */}
-        <button
-          id="dock-gift"
-          onClick={() => {
-            playSound.sparkle();
-            onOpenGift();
-          }}
-          className="w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] rounded-[20px] bg-white/90 backdrop-blur-sm border-2 border-[#FFE3EF] flex items-center justify-center hover:bg-[#FFE3EF] active:scale-95 transition cursor-pointer shadow-[0_4px_12px_rgba(255,111,165,0.25)]"
-          title="Surprise Gift"
-          aria-label="Surprise Gift"
-        >
-          <CartoonGiftIcon className="w-7 h-7 sm:w-8 sm:h-8" />
-        </button>
-
-        {/* Dock Item 4: Fullscreen Toggle */}
-        <button
-          id="dock-fullscreen"
-          onClick={toggleFullscreen}
-          className="w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] rounded-[20px] bg-white/90 backdrop-blur-sm border-2 border-[#FFF1C2] flex items-center justify-center text-[#7A5B0B] hover:bg-[#FFF1C2] active:scale-95 transition cursor-pointer shadow-[0_4px_12px_rgba(255,241,194,0.3)]"
-          title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-          aria-label={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-        >
-          {isFullscreen ? <Minimize className="w-5 h-5 text-[#7A5B0B]" /> : <Maximize className="w-5 h-5 text-[#7A5B0B]" />}
-        </button>
-      </div>
-
-      {/* Caption from Wireframe */}
-      <p className="text-center text-[#4A3B5C] font-bold mt-2 text-[13px] opacity-75">
-        Style 2 — Candy Pastel Playroom: bubble shapes, floaty motion, cotton-candy palette
-      </p>
     </div>
   );
 };

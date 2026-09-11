@@ -1,13 +1,13 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { Maximize, Minimize } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { GameMode, StickerItem, SavedColoringArtwork } from './types';
 import { loadUnlockedStickers, unlockRandomSticker, getStarsCount, addStars } from './utils/storage';
 import { getSoundMuted, setSoundMuted, playSound, getAudioContext } from './utils/audio';
-import { NavigationHeader } from './components/NavigationHeader';
+import { FloatingNav } from './components/FloatingNav';
 import { HomeScreen } from './components/HomeScreen';
 import { RewardModal } from './components/RewardModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
-import { CartoonSoundIcon, CartoonHeroCrown } from './components/CartoonIcons';
+import { CartoonHeroCrown } from './components/CartoonIcons';
 
 // Each game is a sizeable chunk of art/logic and only one is ever on screen
 // at a time, so they're code-split and fetched on demand instead of bloating
@@ -131,169 +131,132 @@ export default function App() {
   const unlockedCount = stickers.filter((s) => s.unlocked).length;
 
   return (
-    <div className="min-h-screen w-full bg-[linear-gradient(160deg,#E3D6FF_0%,#FFD6E8_45%,#FFF1C2_100%)] flex flex-col font-['Nunito',sans-serif] selection:bg-[#FFD6E8] selection:text-[#4A3B5C]">
-      {/* Top App Header (visible in games) */}
-      <NavigationHeader
+    <div className="min-h-screen w-full flex flex-col selection:bg-[#FFD6E8] selection:text-[#4A3B5C]">
+      {/* Main View Area */}
+      <main className="w-full flex-1 flex flex-col items-center justify-center pb-36 sm:pb-40">
+        <AnimatePresence mode="wait">
+          {currentMode === 'home' ? (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+              className="w-full"
+            >
+              <HomeScreen
+                onSelectMode={handleSelectMode}
+                unlockedStickerCount={unlockedCount}
+                totalStickerCount={stickers.length}
+                onOpenGift={handleOpenGift}
+                canOpenGift={true}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key={currentMode}
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -16, scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+              className="w-full max-w-5xl p-2 sm:p-4 my-auto flex-1 flex flex-col justify-center"
+            >
+              <div className="w-full glass-strong glow-pink rounded-[36px] sm:rounded-[44px] p-3 sm:p-6 pt-14 sm:pt-16 relative overflow-hidden flex flex-col justify-between">
+                {/* Decorative blobs inside game container */}
+                <div
+                  className="absolute rounded-full opacity-40 filter blur-[1px] pointer-events-none w-[140px] h-[140px] bg-[#D4F5E9] -top-[30px] -left-[30px]"
+                  aria-hidden="true"
+                />
+                <div
+                  className="absolute rounded-full opacity-40 filter blur-[1px] pointer-events-none w-[120px] h-[120px] bg-[#FFF1C2] -bottom-[30px] -right-[30px]"
+                  aria-hidden="true"
+                />
+
+                {/* Game View */}
+                <div className="relative z-10">
+                  <Suspense fallback={<GameLoadingFallback />}>
+                    {currentMode === 'coloring' && (
+                      <ColoringGame
+                        onReward={handleReward}
+                        onOpenGallery={() => handleSelectMode('royalgallery')}
+                        initialArtwork={continueArtwork}
+                      />
+                    )}
+
+                    {currentMode === 'royalgallery' && (
+                      <RoyalGallery
+                        onNavigate={handleSelectMode}
+                        onContinueColoring={handleContinueColoring}
+                        onReward={handleReward}
+                      />
+                    )}
+
+                    {currentMode === 'dressup' && (
+                      <DressUpGame onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'matching' && (
+                      <MatchingGame onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'bubblepop' && (
+                      <BubblePopGame onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'music' && (
+                      <MusicHarpGame onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'stickers' && (
+                      <StickerBookGame stickers={stickers} onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'royalball' && (
+                      <RoyalBallGame onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'storybook' && (
+                      <InteractiveStorybook onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'crowndecorator' && (
+                      <CrownDecoratorGame onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'teaparty' && (
+                      <TeaPartyGame onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'petspa' && (
+                      <PetSpaGame onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'magicwand' && (
+                      <MagicWandGame onReward={handleReward} />
+                    )}
+
+                    {currentMode === 'shapesorter' && (
+                      <ShapeSorterGame onReward={handleReward} />
+                    )}
+                  </Suspense>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* Floating glass pill navigation — replaces the old full-width bar */}
+      <FloatingNav
         currentMode={currentMode}
         onNavigate={handleSelectMode}
         isMuted={isMuted}
         onToggleSound={handleToggleSound}
         starsCount={starsCount}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={toggleFullscreen}
+        onOpenGift={handleOpenGift}
       />
-
-      {/* Main View Area */}
-      <main className="w-full flex-1 flex flex-col items-center justify-center">
-        {currentMode === 'home' && (
-          <HomeScreen
-            onSelectMode={handleSelectMode}
-            unlockedStickerCount={unlockedCount}
-            totalStickerCount={stickers.length}
-            onOpenGift={handleOpenGift}
-            canOpenGift={true}
-            isMuted={isMuted}
-            onToggleSound={handleToggleSound}
-            starsCount={starsCount}
-          />
-        )}
-
-        {currentMode !== 'home' && (
-          <div className="w-full max-w-5xl p-2 sm:p-4 my-auto flex-1 flex flex-col justify-center">
-            <div className="w-full bg-white rounded-[36px] sm:rounded-[44px] p-3 sm:p-6 shadow-[0_25px_60px_rgba(255,111,165,0.3)] relative overflow-hidden flex flex-col justify-between">
-              {/* Decorative blobs inside game container */}
-              <div
-                className="absolute rounded-full opacity-40 filter blur-[1px] pointer-events-none w-[140px] h-[140px] bg-[#D4F5E9] -top-[30px] -left-[30px]"
-                aria-hidden="true"
-              />
-              <div
-                className="absolute rounded-full opacity-40 filter blur-[1px] pointer-events-none w-[120px] h-[120px] bg-[#FFF1C2] -bottom-[30px] -right-[30px]"
-                aria-hidden="true"
-              />
-
-              {/* Game View */}
-              <div className="relative z-10">
-              <Suspense fallback={<GameLoadingFallback />}>
-                {currentMode === 'coloring' && (
-                  <ColoringGame
-                    onReward={handleReward}
-                    onOpenGallery={() => handleSelectMode('royalgallery')}
-                    initialArtwork={continueArtwork}
-                  />
-                )}
-
-                {currentMode === 'royalgallery' && (
-                  <RoyalGallery
-                    onNavigate={handleSelectMode}
-                    onContinueColoring={handleContinueColoring}
-                    onReward={handleReward}
-                  />
-                )}
-
-                {currentMode === 'dressup' && (
-                  <DressUpGame onReward={handleReward} />
-                )}
-
-                {currentMode === 'matching' && (
-                  <MatchingGame onReward={handleReward} />
-                )}
-
-                {currentMode === 'bubblepop' && (
-                  <BubblePopGame onReward={handleReward} />
-                )}
-
-                {currentMode === 'music' && (
-                  <MusicHarpGame onReward={handleReward} />
-                )}
-
-                {currentMode === 'stickers' && (
-                  <StickerBookGame stickers={stickers} onReward={handleReward} />
-                )}
-
-                {currentMode === 'royalball' && (
-                  <RoyalBallGame onReward={handleReward} />
-                )}
-
-                {currentMode === 'storybook' && (
-                  <InteractiveStorybook onReward={handleReward} />
-                )}
-
-                {currentMode === 'crowndecorator' && (
-                  <CrownDecoratorGame onReward={handleReward} />
-                )}
-
-                {currentMode === 'teaparty' && (
-                  <TeaPartyGame onReward={handleReward} />
-                )}
-
-                {currentMode === 'petspa' && (
-                  <PetSpaGame onReward={handleReward} />
-                )}
-
-                {currentMode === 'magicwand' && (
-                  <MagicWandGame onReward={handleReward} />
-                )}
-
-                {currentMode === 'shapesorter' && (
-                  <ShapeSorterGame onReward={handleReward} />
-                )}
-              </Suspense>
-              </div>
-
-              {/* In-Game Bottom Dock */}
-              <div className="flex justify-center gap-4 sm:gap-6 mt-4 pt-3 border-t border-[#F0E6FF] relative z-20">
-                <button
-                  id="ingame-dock-home"
-                  onClick={() => {
-                    playSound.tap();
-                    handleSelectMode('home');
-                  }}
-                  className="w-[50px] h-[50px] rounded-[18px] bg-white/95 border-2 border-[#E3D6FF] hover:bg-[#FFD6E8] flex items-center justify-center text-[#6E5FA6] active:scale-95 transition cursor-pointer shadow-2xs"
-                  title="Return to Playroom"
-                >
-                  <img src="art/icon-home.png" alt="" className="w-8 h-8 object-contain" />
-                </button>
-
-                <button
-                  id="ingame-dock-stickers"
-                  onClick={() => {
-                    playSound.sparkle();
-                    handleSelectMode('stickers');
-                  }}
-                  className={`w-[50px] h-[50px] rounded-[18px] flex items-center justify-center active:scale-95 transition cursor-pointer shadow-2xs ${
-                    currentMode === 'stickers'
-                      ? 'bg-white/95 border-2 border-[#FF6FA5] shadow-[0_4px_12px_rgba(255,111,165,0.35)]'
-                      : 'bg-white/90 border-2 border-[#E3D6FF] hover:bg-[#EDE5FF]'
-                  }`}
-                  title="Stickers"
-                >
-                  <img src="art/icon-star.png" alt="" className="w-7 h-7 object-contain" />
-                </button>
-
-                <button
-                  id="ingame-dock-sound"
-                  onClick={() => {
-                    playSound.tap();
-                    handleToggleSound();
-                  }}
-                  className="w-[50px] h-[50px] rounded-[18px] bg-white/90 border-2 border-[#E3D6FF] hover:bg-[#EDE5FF] flex items-center justify-center text-[#6E5FA6] active:scale-95 transition cursor-pointer shadow-2xs"
-                  title={isMuted ? 'Turn Sound ON' : 'Mute Sound'}
-                >
-                  <CartoonSoundIcon isMuted={isMuted} className="w-6 h-6" />
-                </button>
-
-                <button
-                  id="ingame-dock-fullscreen"
-                  onClick={toggleFullscreen}
-                  className="w-[50px] h-[50px] rounded-[18px] bg-white/90 border-2 border-[#FFF1C2] hover:bg-[#FFF1C2] flex items-center justify-center text-[#7A5B0B] active:scale-95 transition cursor-pointer shadow-2xs"
-                  title={isFullscreen ? 'Exit Full Screen' : 'Go Full Screen'}
-                  aria-label={isFullscreen ? 'Exit Full Screen' : 'Go Full Screen'}
-                >
-                  {isFullscreen ? <Minimize className="w-5 h-5 text-[#7A5B0B]" /> : <Maximize className="w-5 h-5 text-[#7A5B0B]" />}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
 
       {/* Celebration & Reward Modal */}
       <RewardModal
