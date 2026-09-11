@@ -14,13 +14,28 @@ interface PetDef {
   soapy: string;
 }
 
+// Puppy/Kitten/Bunny/Duckling use one illustration for both states — a
+// floating soap-bubble overlay (rendered below) signals "soapy" instead of
+// swapping to a whole second picture. Lamb/Guinea Pig still have a distinct
+// hand-extracted soapy illustration from an earlier art pass.
 const PETS: PetDef[] = [
-  { id: 'dog', name: 'Puppy', before: 'art/pet-dog-before.png', soapy: 'art/pet-dog-soapy.png' },
-  { id: 'cat', name: 'Kitten', before: 'art/pet-cat-before.png', soapy: 'art/pet-cat-soapy.png' },
-  { id: 'bunny', name: 'Bunny', before: 'art/pet-bunny-before.png', soapy: 'art/pet-bunny-soapy.png' },
+  { id: 'dog', name: 'Puppy', before: 'art/pet-dog-before.png', soapy: 'art/pet-dog-before.png' },
+  { id: 'cat', name: 'Kitten', before: 'art/pet-cat-before.png', soapy: 'art/pet-cat-before.png' },
+  { id: 'bunny', name: 'Bunny', before: 'art/pet-bunny-before.png', soapy: 'art/pet-bunny-before.png' },
   { id: 'lamb', name: 'Lamb', before: 'art/pet-lamb-before.png', soapy: 'art/pet-lamb-soapy.png' },
   { id: 'guinea', name: 'Guinea Pig', before: 'art/pet-guinea-before.png', soapy: 'art/pet-guinea-soapy.png' },
-  { id: 'duck', name: 'Duckling', before: 'art/pet-duck-before.png', soapy: 'art/pet-duck-soapy.png' },
+  { id: 'duck', name: 'Duckling', before: 'art/pet-duck-before.png', soapy: 'art/pet-duck-before.png' },
+];
+
+// Scattered positions (in % of the pet's own box) for the floating soap
+// bubbles shown while a pet is mid-bath.
+const BUBBLE_SPOTS = [
+  { x: 12, y: 15, size: 22, delay: 0 },
+  { x: 78, y: 8, size: 16, delay: 0.15 },
+  { x: 85, y: 40, size: 20, delay: 0.3 },
+  { x: 8, y: 55, size: 18, delay: 0.45 },
+  { x: 55, y: -2, size: 14, delay: 0.6 },
+  { x: 30, y: 70, size: 16, delay: 0.2 },
 ];
 
 type StepId = 'wash' | 'rinse' | 'brush' | 'dry';
@@ -152,6 +167,37 @@ export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
             className="w-full h-full object-contain drop-shadow-xl select-none"
             draggable={false}
           />
+
+          {/* Floating soap bubbles while mid-bath */}
+          <AnimatePresence>
+            {isSoapy && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 pointer-events-none"
+              >
+                {BUBBLE_SPOTS.map((b, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.3, y: 6 }}
+                    animate={{ opacity: [0, 1, 1, 0.7], scale: [0.3, 1, 1, 0.85], y: [6, -6, -14, -20] }}
+                    transition={{ duration: 2.2, delay: b.delay, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute rounded-full"
+                    style={{
+                      left: `${b.x}%`,
+                      top: `${b.y}%`,
+                      width: b.size,
+                      height: b.size,
+                      background:
+                        'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95), rgba(224,242,254,0.55) 55%, rgba(186,230,253,0.35) 100%)',
+                      boxShadow: '0 0 6px rgba(255,255,255,0.6)',
+                    }}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Celebration sparkle burst */}
           {celebrating && (
