@@ -236,12 +236,15 @@ export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ ...spring, delay: 0.05 }}
-          className="relative flex-1 h-[340px] sm:h-[380px] rounded-[40px] border-4 border-white/80 glow-pink overflow-hidden flex items-end justify-center bg-cover bg-center"
+          className="relative flex-1 h-[340px] sm:h-[380px] rounded-[40px] border-4 border-white/80 glow-pink overflow-hidden bg-cover bg-center"
           style={{ backgroundImage: "url('art/spa-bg-bathroom.png')" }}
         >
           <div className="absolute inset-0 bg-white/10" />
 
-          {/* Pet — tap/dab it with whichever tool is "in hand" */}
+          {/* Pet — nestled inside the tub basin. Outer div handles the fixed
+              left/top-centered placement so motion's own transform (for the
+              scale/hover/tap animation below) doesn't clobber it. */}
+          <div className="absolute z-10" style={{ left: '38%', top: '58%', transform: 'translate(-50%, -50%)' }}>
           <motion.button
             id="spa-pet-stage"
             onPointerDown={handlePetTouch}
@@ -249,7 +252,7 @@ export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
             transition={spring}
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.94 }}
-            className={`relative z-10 mb-6 w-40 h-40 sm:w-48 sm:h-48 ${activeStep ? 'cursor-crosshair' : 'cursor-pointer'}`}
+            className={`relative block w-32 h-32 sm:w-40 sm:h-40 ${activeStep ? 'cursor-crosshair' : 'cursor-pointer'}`}
             title={selectedPet.name}
           >
             <motion.div key={wiggleTick} initial={{ rotate: 0 }} animate={{ rotate: [0, -9, 8, -5, 4, 0] }} transition={{ duration: 0.5 }}>
@@ -337,6 +340,7 @@ export const PetSpaGame: React.FC<PetSpaGameProps> = ({ onReward }) => {
               />
             )}
           </motion.button>
+          </div>
 
           {/* "Squeaky clean" badge */}
           <AnimatePresence>
