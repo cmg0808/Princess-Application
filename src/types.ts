@@ -79,7 +79,7 @@ export interface PlacedGem {
   id: string;
   type: string;
   label: string;
-  emoji: string;
+  src: string;
   color: string;
   x: number; // %
   y: number; // %
@@ -89,7 +89,7 @@ export interface PlacedGem {
 export interface CrownBaseOption {
   id: string;
   name: string;
-  emoji: string;
+  src: string;
   description: string;
 }
 
@@ -100,6 +100,7 @@ export interface CrownMetalOption {
   gradient: string;
   borderColor: string;
   glowColor: string;
+  filterCss: string;
 }
 
 // Storybook Types

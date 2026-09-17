@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, RotateCcw, Trophy, Check, Star, Heart } from 'lucide-react';
+import { motion } from 'motion/react';
+import { RotateCcw, Trophy, Check } from 'lucide-react';
 import { playSound } from '../utils/audio';
 
 interface ShapeSorterGameProps {
@@ -9,70 +10,21 @@ interface ShapeSorterGameProps {
 interface ShapeItem {
   id: string;
   name: string;
-  emoji: string;
+  src: string;
   colorName: string;
-  bgGradient: string;
-  borderColor: string;
-  textColor: string;
   matched: boolean;
 }
 
 const ALL_SHAPES: Omit<ShapeItem, 'matched'>[] = [
-  {
-    id: 'star',
-    name: 'Yellow Star',
-    emoji: '⭐',
-    colorName: 'Gold',
-    bgGradient: 'from-amber-300 via-yellow-400 to-amber-400',
-    borderColor: 'border-yellow-400',
-    textColor: 'text-amber-900',
-  },
-  {
-    id: 'heart',
-    name: 'Ruby Heart',
-    emoji: '💖',
-    colorName: 'Pink',
-    bgGradient: 'from-pink-400 via-rose-400 to-pink-500',
-    borderColor: 'border-rose-400',
-    textColor: 'text-rose-950',
-  },
-  {
-    id: 'circle',
-    name: 'Blue Circle',
-    emoji: '🔵',
-    colorName: 'Blue',
-    bgGradient: 'from-sky-400 via-blue-400 to-cyan-400',
-    borderColor: 'border-sky-400',
-    textColor: 'text-sky-950',
-  },
-  {
-    id: 'diamond',
-    name: 'Crystal Diamond',
-    emoji: '💎',
-    colorName: 'Cyan',
-    bgGradient: 'from-cyan-300 via-teal-300 to-sky-300',
-    borderColor: 'border-cyan-400',
-    textColor: 'text-cyan-950',
-  },
-  {
-    id: 'triangle',
-    name: 'Emerald Triangle',
-    emoji: '🔺',
-    colorName: 'Green',
-    bgGradient: 'from-emerald-400 via-green-400 to-teal-400',
-    borderColor: 'border-emerald-400',
-    textColor: 'text-emerald-950',
-  },
-  {
-    id: 'moon',
-    name: 'Purple Moon',
-    emoji: '🌙',
-    colorName: 'Purple',
-    bgGradient: 'from-purple-400 via-fuchsia-400 to-indigo-400',
-    borderColor: 'border-purple-400',
-    textColor: 'text-purple-950',
-  },
+  { id: 'star', name: 'Gold Star', src: 'art/gold-star.png', colorName: 'Gold' },
+  { id: 'heart', name: 'Ruby Heart', src: 'art/ruby-heart.png', colorName: 'Pink' },
+  { id: 'circle', name: 'Sapphire Circle', src: 'art/sapphire.png', colorName: 'Blue' },
+  { id: 'diamond', name: 'Amethyst Diamond', src: 'art/amethyst-diamond.png', colorName: 'Purple' },
+  { id: 'triangle', name: 'Ruby Triangle', src: 'art/ruby-triangle.png', colorName: 'Red' },
+  { id: 'moon', name: 'Turquoise Moon', src: 'art/turquoise-moon.png', colorName: 'Teal' },
 ];
+
+const spring = { type: 'spring' as const, stiffness: 360, damping: 20 };
 
 export const ShapeSorterGame: React.FC<ShapeSorterGameProps> = ({ onReward }) => {
   const [level, setLevel] = useState<1 | 2 | 3>(1);
@@ -163,23 +115,28 @@ export const ShapeSorterGame: React.FC<ShapeSorterGameProps> = ({ onReward }) =>
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-3 select-none font-['Fredoka']">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-3 select-none">
       {/* Top Header & Level Selector */}
-      <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs px-4 py-2.5 rounded-3xl border-2 border-pink-200 shadow-sm flex items-center justify-between gap-2">
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={spring}
+        className="w-full max-w-2xl glass-strong glow-lavender px-4 py-2.5 rounded-[28px] flex items-center justify-between gap-2"
+      >
         <div className="flex items-center gap-2">
-          <span className="text-3xl animate-bounce">💎</span>
+          <img src="art/gold-star.png" alt="" className="w-9 h-9 object-contain drop-shadow" />
           <div>
-            <h3 className="text-base sm:text-lg font-black text-pink-800 leading-tight">
+            <h3 className="font-display italic text-base sm:text-xl font-bold text-pink-800 leading-tight">
               Royal Shape Sorter
             </h3>
-            <span className="text-xs font-bold text-pink-500">
-              Match gems into velvet treasure chests
+            <span className="text-xs font-bold text-pink-600/80">
+              Match gems into their treasure chests
             </span>
           </div>
         </div>
 
         {/* Level Selector */}
-        <div className="flex items-center gap-1 bg-pink-100 p-1 rounded-2xl border border-pink-200">
+        <div className="flex items-center gap-1 bg-white/70 p-1 rounded-full">
           {([1, 2, 3] as const).map((lvl) => (
             <button
               key={lvl}
@@ -188,23 +145,27 @@ export const ShapeSorterGame: React.FC<ShapeSorterGameProps> = ({ onReward }) =>
                 playSound.tap();
                 setLevel(lvl);
               }}
-              className={`px-3 py-1 rounded-xl font-black text-xs sm:text-sm transition cursor-pointer ${
+              className={`px-3 py-1 rounded-full font-black text-xs sm:text-sm transition cursor-pointer ${
                 level === lvl
                   ? 'bg-pink-500 text-white shadow-xs'
-                  : 'text-pink-700 hover:bg-pink-200/60'
+                  : 'text-pink-700 hover:bg-pink-100'
               }`}
             >
               Lvl {lvl}
             </button>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Sorting Stage Canvas */}
-      <div className="relative w-full max-w-2xl h-[320px] sm:h-[350px] rounded-3xl border-4 border-pink-300 shadow-2xl bg-linear-to-b from-indigo-100 via-purple-50 to-pink-100 overflow-hidden flex flex-col justify-between p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ ...spring, delay: 0.05 }}
+        className="relative w-full max-w-2xl h-[320px] sm:h-[350px] rounded-[40px] border-4 border-white/70 glow-pink bg-linear-to-b from-indigo-100 via-purple-50 to-pink-100 overflow-hidden flex flex-col justify-between p-4"
+      >
         {/* Praise Speech Bubble Banner */}
-        <div className="relative z-10 self-center bg-white/95 backdrop-blur-xs px-4 py-1.5 rounded-full border-2 border-pink-300 shadow-md flex items-center gap-2 animate-in zoom-in duration-200">
-          <span className="text-base sm:text-lg">✨</span>
+        <div className="relative z-10 self-center glass-strong px-4 py-1.5 rounded-full flex items-center gap-2">
           <span className="text-xs sm:text-sm font-black text-pink-800">
             {praiseText}
           </span>
@@ -215,36 +176,36 @@ export const ShapeSorterGame: React.FC<ShapeSorterGameProps> = ({ onReward }) =>
           {shapes.map((shape) => {
             const isTargetSelected = selectedShapeId === shape.id;
             return (
-              <button
+              <motion.button
                 key={shape.id}
                 id={`chest-${shape.id}`}
                 onClick={() => handleChestTap(shape.id)}
-                className={`relative flex flex-col items-center justify-center p-3 rounded-2xl border-3 transition-all cursor-pointer ${
+                whileHover={{ y: -3 }}
+                whileTap={{ scale: 0.92 }}
+                animate={{ scale: isTargetSelected ? 1.06 : 1 }}
+                transition={spring}
+                className={`relative flex flex-col items-center justify-center p-3 rounded-[22px] cursor-pointer ${
                   shape.matched
-                    ? 'bg-white/95 border-emerald-400 ring-2 ring-emerald-200 shadow-md'
+                    ? 'glass-strong ring-2 ring-emerald-300 glow-lavender'
                     : isTargetSelected
-                    ? 'bg-amber-100/90 border-amber-400 ring-4 ring-amber-300 scale-105 animate-pulse'
-                    : 'bg-white/70 border-dashed border-purple-300 hover:bg-white/90 active:scale-95'
+                    ? 'glass-strong glow-gold ring-4 ring-amber-300'
+                    : 'glass border-2 border-dashed border-purple-200'
                 }`}
                 title={`Treasure Chest for ${shape.name}`}
               >
-                {/* Chest Emoji & Shape Slot Silhouette */}
-                <div className="relative flex items-center justify-center">
-                  <span className="text-4xl sm:text-5xl filter drop-shadow select-none">
+                {/* Chest & Shape Slot */}
+                <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
+                  <span className="text-3xl sm:text-4xl filter drop-shadow select-none">
                     {shape.matched ? '📦' : '🧰'}
                   </span>
 
-                  {/* Inside Gem if matched */}
-                  {shape.matched ? (
-                    <span className="absolute text-2xl sm:text-3xl animate-bounce">
-                      {shape.emoji}
-                    </span>
-                  ) : (
-                    /* Silhouette outline */
-                    <span className="absolute text-xl opacity-35 filter grayscale">
-                      {shape.emoji}
-                    </span>
-                  )}
+                  <img
+                    src={shape.src}
+                    alt=""
+                    className={`absolute w-6 h-6 sm:w-7 sm:h-7 object-contain ${
+                      shape.matched ? 'animate-bounce' : 'opacity-40 grayscale'
+                    }`}
+                  />
                 </div>
 
                 {/* Chest Label */}
@@ -257,29 +218,39 @@ export const ShapeSorterGame: React.FC<ShapeSorterGameProps> = ({ onReward }) =>
                     <Check className="w-3.5 h-3.5" />
                   </div>
                 )}
-              </button>
+              </motion.button>
             );
           })}
         </div>
 
         {/* Celebration Banner if round complete */}
         {roundComplete && (
-          <div className="relative z-20 self-center bg-linear-to-r from-yellow-400 via-pink-400 to-purple-400 text-white px-5 py-2 rounded-2xl border-2 border-white shadow-xl flex items-center gap-2 animate-bounce">
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={spring}
+            className="relative z-20 self-center bg-linear-to-r from-yellow-400 via-pink-400 to-purple-400 text-white px-5 py-2 rounded-full glow-gold flex items-center gap-2"
+          >
             <Trophy className="w-5 h-5" />
-            <span className="text-sm sm:text-base font-black">All gems sorted! Hooray! 🎉</span>
-          </div>
+            <span className="text-sm sm:text-base font-black">All gems sorted! Hooray!</span>
+          </motion.div>
         )}
 
         {/* Toddler Hint */}
-        <div className="relative z-10 self-center text-[11px] font-bold text-pink-700 bg-white/80 backdrop-blur-xs px-3 py-0.5 rounded-full border border-pink-200 pointer-events-none">
-          👆 Tap a shape at the bottom, then tap its matching chest!
+        <div className="relative z-10 self-center text-[11px] font-bold text-pink-700 glass px-3 py-0.5 rounded-full pointer-events-none">
+          Tap a gem at the bottom, then tap its matching chest!
         </div>
-      </div>
+      </motion.div>
 
-      {/* Bottom Shape Gem Tray (Chunky Touch Targets for Toddlers) */}
-      <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs p-3 rounded-3xl border-2 border-pink-200 shadow-sm flex flex-col gap-2">
+      {/* Bottom Shape Gem Tray */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...spring, delay: 0.1 }}
+        className="w-full max-w-2xl glass-strong glow-lavender p-3 rounded-[28px] flex flex-col gap-2"
+      >
         <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-black text-pink-700">Pick a Royal Shape:</span>
+          <span className="text-xs font-black text-pink-700">Pick a Royal Gem:</span>
           <button
             id="btn-shape-reset"
             onClick={() => initLevel(level)}
@@ -292,29 +263,31 @@ export const ShapeSorterGame: React.FC<ShapeSorterGameProps> = ({ onReward }) =>
 
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 w-full">
           {shapes.map((shape) => (
-            <button
+            <motion.button
               key={shape.id}
               id={`shape-item-${shape.id}`}
               disabled={shape.matched}
               onClick={() => handleSelectShape(shape.id)}
-              className={`flex flex-col items-center justify-center p-2.5 rounded-2xl border-3 transition-all cursor-pointer ${
+              whileHover={shape.matched ? {} : { y: -3, scale: 1.05 }}
+              whileTap={shape.matched ? {} : { scale: 0.9 }}
+              animate={{ scale: selectedShapeId === shape.id ? 1.08 : 1 }}
+              transition={spring}
+              className={`flex flex-col items-center justify-center gap-1 p-2 rounded-[20px] cursor-pointer ${
                 shape.matched
-                  ? 'opacity-30 cursor-not-allowed border-gray-200 bg-gray-50'
+                  ? 'opacity-30 cursor-not-allowed glass'
                   : selectedShapeId === shape.id
-                  ? 'bg-pink-100 border-pink-500 ring-4 ring-pink-300 scale-110 shadow-md'
-                  : 'bg-white border-pink-200 hover:scale-105 active:scale-95 shadow-xs'
+                  ? 'glass-strong glow-gold ring-4 ring-pink-300'
+                  : 'glass hover:glow-pink'
               }`}
             >
-              <span className="text-3xl sm:text-4xl filter drop-shadow select-none">
-                {shape.emoji}
-              </span>
-              <span className="text-[10px] font-black text-pink-900 mt-1 truncate w-full text-center">
+              <img src={shape.src} alt="" className="w-9 h-9 sm:w-11 sm:h-11 object-contain drop-shadow" draggable={false} />
+              <span className="text-[10px] font-black text-pink-900 truncate w-full text-center">
                 {shape.colorName}
               </span>
-            </button>
+            </motion.button>
           ))}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
