@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Trash2, RotateCcw, Volume2, Star, Heart } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Trash2 } from 'lucide-react';
 import { playSound } from '../utils/audio';
 
 interface MagicWandGameProps {
@@ -21,46 +22,60 @@ interface MagicSparkleParticle {
 interface WandStyle {
   id: string;
   name: string;
-  emoji: string;
+  src: string;
   particleEmojis: string[];
-  gradient: string;
   auraColor: string;
 }
 
+// The wand pictures are illustrated; only the sparkle trail itself is still
+// emoji-based (kept as-is — it already reads as "magic" and toddlers love
+// it, no need to replace what already works).
 const WAND_STYLES: WandStyle[] = [
   {
-    id: 'star',
-    name: 'Starlight Wand',
-    emoji: '🪄',
+    id: 'moon',
+    name: 'Moonlight Wand',
+    src: 'art/wand-moon.png',
     particleEmojis: ['⭐', '✨', '🌟', '💫', '🟡'],
-    gradient: 'from-amber-300 via-yellow-400 to-amber-500',
-    auraColor: 'rgba(253, 224, 71, 0.6)',
+    auraColor: 'rgba(125, 211, 252, 0.6)',
   },
   {
     id: 'heart',
     name: 'Heart Wand',
-    emoji: '💖',
+    src: 'art/wand-heart.png',
     particleEmojis: ['💖', '💕', '💗', '✨', '🌸'],
-    gradient: 'from-rose-400 via-pink-400 to-rose-500',
     auraColor: 'rgba(244, 63, 94, 0.6)',
   },
   {
-    id: 'rainbow',
-    name: 'Rainbow Wand',
-    emoji: '🌈',
+    id: 'crystal',
+    name: 'Crystal Wand',
+    src: 'art/wand-crystal.png',
     particleEmojis: ['🌈', '✨', '💎', '🦋', '⭐'],
-    gradient: 'from-pink-400 via-purple-400 to-sky-400',
     auraColor: 'rgba(168, 85, 247, 0.6)',
   },
   {
-    id: 'fairy',
-    name: 'Fairy Blossom',
-    emoji: '🌸',
+    id: 'clover',
+    name: 'Clover Wand',
+    src: 'art/wand-clover.png',
     particleEmojis: ['🌸', '🌺', '🌷', '✨', '🧚'],
-    gradient: 'from-emerald-300 via-teal-300 to-pink-300',
     auraColor: 'rgba(52, 211, 153, 0.6)',
   },
+  {
+    id: 'sun',
+    name: 'Sunshine Wand',
+    src: 'art/wand-sun.png',
+    particleEmojis: ['⭐', '✨', '🌟', '💫', '🟡'],
+    auraColor: 'rgba(251, 191, 36, 0.6)',
+  },
+  {
+    id: 'spiral',
+    name: 'Seashell Wand',
+    src: 'art/wand-spiral.png',
+    particleEmojis: ['🌈', '✨', '💎', '🦋', '⭐'],
+    auraColor: 'rgba(45, 212, 191, 0.6)',
+  },
 ];
+
+const spring = { type: 'spring' as const, stiffness: 360, damping: 20 };
 
 export const MagicWandGame: React.FC<MagicWandGameProps> = ({ onReward }) => {
   const [selectedWand, setSelectedWand] = useState<WandStyle>(WAND_STYLES[0]);
@@ -193,41 +208,51 @@ export const MagicWandGame: React.FC<MagicWandGameProps> = ({ onReward }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-3 select-none font-['Fredoka']">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 flex flex-col items-center gap-3 select-none">
       {/* Top Header */}
-      <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs px-4 py-2.5 rounded-3xl border-2 border-pink-200 shadow-sm flex items-center justify-between gap-2">
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={spring}
+        className="w-full max-w-2xl glass-strong glow-lavender px-4 py-2.5 rounded-[28px] flex items-center justify-between gap-2"
+      >
         <div className="flex items-center gap-2">
-          <span className="text-3xl animate-bounce">🪄</span>
+          <img src={selectedWand.src} alt="" className="w-9 h-9 object-contain drop-shadow" />
           <div>
-            <h3 className="text-base sm:text-lg font-black text-pink-800 leading-tight">
-              Magic Wand & Fireworks
+            <h3 className="font-display italic text-base sm:text-xl font-bold text-pink-800 leading-tight">
+              Magic Wand &amp; Fireworks
             </h3>
-            <span className="text-xs font-bold text-pink-500">
-              Drag your wand across the sky! ✨
+            <span className="text-xs font-bold text-pink-600/80">
+              Drag your wand across the sky!
             </span>
           </div>
         </div>
 
         {/* Fireworks Button */}
-        <button
+        <motion.button
           id="btn-fireworks-launch"
           onClick={handleLaunchFireworks}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-linear-to-r from-amber-400 via-rose-400 to-purple-500 text-white font-black text-xs sm:text-sm shadow-md hover:scale-105 active:scale-95 transition cursor-pointer border-2 border-white"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.92 }}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-linear-to-r from-amber-400 via-rose-400 to-purple-500 text-white font-black text-xs sm:text-sm glow-gold cursor-pointer"
         >
           <span className="text-lg animate-pulse">🎆</span>
           <span>Fireworks!</span>
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
 
       {/* Main Night Sky Canvas */}
-      <div
+      <motion.div
         ref={canvasRef}
         id="wand-canvas"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ ...spring, delay: 0.05 }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        className="relative w-full max-w-2xl h-[360px] sm:h-[400px] rounded-3xl border-4 border-pink-300 shadow-2xl overflow-hidden bg-linear-to-b from-slate-950 via-indigo-950 to-purple-900 cursor-crosshair touch-none"
+        className="relative w-full max-w-2xl h-[360px] sm:h-[400px] rounded-[40px] border-4 border-white/70 glow-pink overflow-hidden bg-linear-to-b from-slate-950 via-indigo-950 to-purple-900 cursor-crosshair touch-none"
       >
         {/* Fairytale Palace Silhouette at the Bottom */}
         <div className="absolute bottom-0 inset-x-0 flex justify-center pointer-events-none opacity-40 select-none">
@@ -265,13 +290,18 @@ export const MagicWandGame: React.FC<MagicWandGameProps> = ({ onReward }) => {
         ))}
 
         {/* Toddler Guidance Banner */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xs px-4 py-1 rounded-full border border-pink-200 pointer-events-none text-xs font-black text-pink-700 shadow-xs">
-          👆 Swipe or tap anywhere to cast magical fireworks & sparkles!
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 glass-strong px-4 py-1 rounded-full pointer-events-none text-xs font-black text-pink-700 shadow-xs">
+          Swipe or tap anywhere to cast magical fireworks &amp; sparkles!
         </div>
-      </div>
+      </motion.div>
 
-      {/* Wand Selector & Action Controls (Chunky Toddler Buttons) */}
-      <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xs p-3 rounded-3xl border-2 border-pink-200 shadow-sm flex flex-col gap-2">
+      {/* Wand Selector & Action Controls */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...spring, delay: 0.1 }}
+        className="w-full max-w-2xl glass-strong glow-lavender p-3 rounded-[28px] flex flex-col gap-2"
+      >
         <div className="flex items-center justify-between px-1">
           <span className="text-xs font-black text-pink-700">Choose Your Magic Wand:</span>
           <button
@@ -284,32 +314,30 @@ export const MagicWandGame: React.FC<MagicWandGameProps> = ({ onReward }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 w-full">
           {WAND_STYLES.map((w) => (
-            <button
+            <motion.button
               key={w.id}
               id={`btn-wand-${w.id}`}
               onClick={() => {
                 playSound.sparkle();
                 setSelectedWand(w);
               }}
-              className={`flex items-center gap-2 p-2.5 rounded-2xl border-2 transition cursor-pointer ${
-                selectedWand.id === w.id
-                  ? 'bg-pink-500 text-white border-pink-600 shadow-md scale-102 ring-2 ring-pink-300'
-                  : 'bg-pink-50 border-pink-200 text-pink-900 hover:bg-pink-100'
+              whileHover={{ y: -3, scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
+              animate={{ scale: selectedWand.id === w.id ? 1.06 : 1 }}
+              transition={spring}
+              className={`flex flex-col items-center gap-1 p-2 rounded-[20px] cursor-pointer ${
+                selectedWand.id === w.id ? 'glass-strong glow-gold ring-2 ring-yellow-300' : 'glass hover:glow-pink'
               }`}
+              title={w.name}
             >
-              <span className="text-2xl filter drop-shadow">{w.emoji}</span>
-              <div className="text-left">
-                <span className="block text-xs font-black">{w.name}</span>
-                <span className="block text-[10px] opacity-80">
-                  {w.particleEmojis.slice(0, 3).join('')}
-                </span>
-              </div>
-            </button>
+              <img src={w.src} alt="" className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow" draggable={false} />
+              <span className="text-[10px] font-black text-[#4A3B5C] leading-tight text-center">{w.name}</span>
+            </motion.button>
           ))}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
