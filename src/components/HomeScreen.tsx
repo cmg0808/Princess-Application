@@ -3,16 +3,7 @@ import { motion } from 'motion/react';
 import { GameMode } from '../types';
 import { playSound } from '../utils/audio';
 import { PWAInstallButton } from './PWAInstallButton';
-import {
-  CartoonBookIcon,
-  CartoonMusicIcon,
-  CartoonPuzzleIcon,
-  CartoonMagicWandIcon,
-  CartoonBallIcon,
-  CartoonStickerStarIcon,
-  CartoonHeroCrown,
-  CartoonGalleryIcon,
-} from './CartoonIcons';
+import { CartoonHeroCrown } from './CartoonIcons';
 
 interface HomeScreenProps {
   onSelectMode: (mode: GameMode) => void;
@@ -45,7 +36,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#FFD6E8]', // var(--pink)
       shapeClass: 'rounded-[38%_62%_60%_40%_/_45%_40%_60%_55%]',
       animDelay: '0.04s',
-      icon: <CartoonBookIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="art/icon-story.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'music',
@@ -53,7 +44,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#D4F5E9]', // var(--mint)
       shapeClass: 'rounded-[55%_45%_35%_65%_/_40%_60%_40%_60%]',
       animDelay: '0.10s',
-      icon: <CartoonMusicIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="art/icon-music.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'coloring',
@@ -85,7 +76,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#E6FBEF]', // fresh pastel mint
       shapeClass: 'rounded-[38%_62%_58%_42%_/_50%_45%_55%_50%]',
       animDelay: '0.34s',
-      icon: <CartoonPuzzleIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="art/icon-puzzles.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'petspa',
@@ -101,7 +92,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#FDE2F3]', // dreamy violet pink
       shapeClass: 'rounded-[42%_58%_62%_38%_/_55%_45%_55%_45%]',
       animDelay: '0.46s',
-      icon: <CartoonMagicWandIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="art/icon-magicwand.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'shapesorter',
@@ -117,7 +108,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#F3E8FF]', // lilac dream
       shapeClass: 'rounded-[48%_52%_40%_60%_/_52%_48%_60%_40%]',
       animDelay: '0.58s',
-      icon: <CartoonBallIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="art/icon-danceball.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'crowndecorator',
@@ -141,7 +132,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#FFF0F5]', // candy blossom
       shapeClass: 'rounded-[55%_45%_55%_45%_/_45%_55%_45%_55%]',
       animDelay: '0.76s',
-      icon: <CartoonStickerStarIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="art/icon-stickers.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
       mode: 'royalgallery',
@@ -149,7 +140,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       bgClass: 'bg-[#FFF4DE]', // warm gilded cream
       shapeClass: 'rounded-[45%_55%_50%_50%_/_55%_45%_50%_50%]',
       animDelay: '0.82s',
-      icon: <CartoonGalleryIcon className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs" />,
+      icon: <img src="art/icon-gallery.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
   ];
 
