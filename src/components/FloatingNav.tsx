@@ -33,6 +33,7 @@ const MODE_TITLES: Partial<Record<GameMode, string>> = {
   music: 'Music',
   stickers: 'Stickers',
   royalgallery: 'Royal Gallery',
+  parents: 'Parents Corner',
 };
 
 const spring = { type: 'spring' as const, stiffness: 380, damping: 22 };

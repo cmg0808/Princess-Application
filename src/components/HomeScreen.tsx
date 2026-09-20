@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
+import { Settings } from 'lucide-react';
 import { GameMode } from '../types';
 import { playSound } from '../utils/audio';
 import { PWAInstallButton } from './PWAInstallButton';
@@ -11,6 +12,7 @@ interface HomeScreenProps {
   totalStickerCount: number;
   onOpenGift: () => void;
   canOpenGift: boolean;
+  onOpenParents: () => void;
 }
 
 interface CandyBubble {
@@ -28,6 +30,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   totalStickerCount,
   onOpenGift,
   canOpenGift,
+  onOpenParents,
 }) => {
   const bubbles: CandyBubble[] = [
     {
@@ -144,6 +147,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     },
   ];
 
+  // "No dead ends": if the home screen sits untouched for a while, gently
+  // bounce-glow a random tile so there's always a visual invitation to tap.
+  const [nudgeMode, setNudgeMode] = useState<GameMode | null>(null);
+  const idleTimerRef = useRef<number | null>(null);
+  const nudgeClearRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const scheduleNudge = () => {
+      if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = window.setTimeout(() => {
+        const pick = bubbles[Math.floor(Math.random() * bubbles.length)];
+        setNudgeMode(pick.mode);
+        if (nudgeClearRef.current) window.clearTimeout(nudgeClearRef.current);
+        nudgeClearRef.current = window.setTimeout(() => setNudgeMode(null), 1400);
+        scheduleNudge();
+      }, 6000);
+    };
+
+    scheduleNudge();
+    window.addEventListener('pointerdown', scheduleNudge);
+    return () => {
+      window.removeEventListener('pointerdown', scheduleNudge);
+      if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
+      if (nudgeClearRef.current) window.clearTimeout(nudgeClearRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="w-full flex flex-col gap-2 p-3 sm:p-6 md:p-8 select-none relative max-w-7xl mx-auto">
       {/* Decorative Floaty Background Blobs positioned across screen */}
@@ -171,6 +202,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       >
         <PWAInstallButton />
       </div>
+
+      {/* Discreet Parents/Settings gear — deliberately small and low-contrast
+          so it doesn't invite toddler taps, per the "no text buttons, gear
+          icon in the corner" pattern for kids' app hubs. */}
+      <button
+        id="btn-open-parents"
+        onClick={() => {
+          playSound.tap();
+          onOpenParents();
+        }}
+        className="fixed z-30 top-3 left-3 sm:top-5 sm:left-5 w-9 h-9 rounded-full bg-white/50 hover:bg-white/80 flex items-center justify-center text-[#4A3B5C]/50 hover:text-[#4A3B5C] cursor-pointer transition-colors"
+        style={{ marginTop: 'max(0px, env(safe-area-inset-top))' }}
+        title="Parents"
+        aria-label="Parents Corner"
+      >
+        <Settings className="w-4 h-4" />
+      </button>
 
       {/* Hero Area — the crown badge deliberately overlaps/breaks out of its
           own glass plaque for a "pop-up storybook" feel instead of sitting
@@ -238,10 +286,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 hidden: { opacity: 0, y: 22, scale: 0.6 },
                 show: { opacity: 1, y: 0, scale: 1 },
               }}
-              transition={{ type: 'spring', stiffness: 340, damping: 18 }}
+              animate={nudgeMode === b.mode ? { scale: [1, 1.14, 1, 1.1, 1], y: [0, -10, 0, -6, 0] } : undefined}
+              transition={
+                nudgeMode === b.mode
+                  ? { duration: 1.3, ease: 'easeInOut' }
+                  : { type: 'spring', stiffness: 340, damping: 18 }
+              }
               whileHover={{ scale: 1.1, y: -4 }}
               whileTap={{ scale: 0.9 }}
-              className={`w-[96px] h-[96px] sm:w-[108px] sm:h-[108px] md:w-[118px] md:h-[118px] ${b.shapeClass} ${b.bgClass} flex flex-col items-center justify-center gap-1 sm:gap-1.5 font-['Baloo_2'] font-bold text-[13px] sm:text-[14px] text-[#4A3B5C] shadow-[0_10px_22px_rgba(74,59,92,0.12)] cursor-pointer text-center p-2`}
+              className={`w-[96px] h-[96px] sm:w-[108px] sm:h-[108px] md:w-[118px] md:h-[118px] ${b.shapeClass} ${b.bgClass} flex flex-col items-center justify-center gap-1 sm:gap-1.5 font-['Baloo_2'] font-bold text-[13px] sm:text-[14px] text-[#4A3B5C] cursor-pointer text-center p-2 ${
+                nudgeMode === b.mode ? 'glow-gold' : 'shadow-[0_10px_22px_rgba(74,59,92,0.12)]'
+              }`}
             >
               <div className="pointer-events-none scale-105 sm:scale-115">{b.icon}</div>
               <span className="leading-tight pointer-events-none truncate w-full px-1">{b.label}</span>

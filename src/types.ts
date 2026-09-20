@@ -13,7 +13,8 @@ export type GameMode =
   | 'teaparty'
   | 'petspa'
   | 'magicwand'
-  | 'shapesorter';
+  | 'shapesorter'
+  | 'parents';
 
 export interface StickerItem {
   id: string;

@@ -8,6 +8,8 @@ import { HomeScreen } from './components/HomeScreen';
 import { RewardModal } from './components/RewardModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { CartoonHeroCrown } from './components/CartoonIcons';
+import { ParentalGate } from './components/ParentalGate';
+import { ParentsCorner } from './components/ParentsCorner';
 
 // Each game is a sizeable chunk of art/logic and only one is ever on screen
 // at a time, so they're code-split and fetched on demand instead of bloating
@@ -47,6 +49,7 @@ export default function App() {
   const [rewardSticker, setRewardSticker] = useState<StickerItem | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [continueArtwork, setContinueArtwork] = useState<SavedColoringArtwork | null>(null);
+  const [showParentalGate, setShowParentalGate] = useState<boolean>(false);
 
   // Navigate to any mode, clearing any "continue coloring" hand-off unless
   // explicitly set by handleContinueColoring below.
@@ -150,6 +153,7 @@ export default function App() {
                 totalStickerCount={stickers.length}
                 onOpenGift={handleOpenGift}
                 canOpenGift={true}
+                onOpenParents={() => setShowParentalGate(true)}
               />
             </motion.div>
           ) : (
@@ -238,6 +242,10 @@ export default function App() {
                     {currentMode === 'shapesorter' && (
                       <ShapeSorterGame onReward={handleReward} />
                     )}
+
+                    {currentMode === 'parents' && (
+                      <ParentsCorner isMuted={isMuted} onToggleSound={handleToggleSound} />
+                    )}
                   </Suspense>
                 </div>
               </div>
@@ -263,6 +271,19 @@ export default function App() {
         sticker={rewardSticker}
         onClose={() => setRewardSticker(null)}
       />
+
+      {/* Parental Gate — required before entering Parents Corner */}
+      <AnimatePresence>
+        {showParentalGate && (
+          <ParentalGate
+            onSuccess={() => {
+              setShowParentalGate(false);
+              handleSelectMode('parents');
+            }}
+            onCancel={() => setShowParentalGate(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* PWA Offline Indicator */}
       <OfflineIndicator />
