@@ -466,4 +466,336 @@ export const REAL_COLORING_PAGES: ColoringPage[] = [
       <circle cx="273" cy="87" r="2.5" fill="#FFFFFF" />
     `,
   },
+
+  // ================= 7. MERMAID & THE PEARL SHELL =================
+  {
+    id: 'mermaid_shell',
+    title: 'Mermaid & Pearl Shell',
+    emoji: '🐚',
+    category: 'Fairytale',
+    regions: [
+      { id: 'sea_water', d: 'M0,0 L400,0 L400,300 L0,300 Z', label: 'Ocean Water', defaultColor: '#22D3EE' },
+      { id: 'sand_bed', d: 'M0,300 Q200,275 400,300 L400,400 L0,400 Z', label: 'Sandy Sea Floor', defaultColor: '#FDE68A' },
+      { id: 'tiara', d: 'M172,95 L182,72 L200,85 L218,72 L228,95 Z', label: 'Pearl Tiara', defaultColor: '#FACC15' },
+      { id: 'hair_left', d: 'M150,105 Q110,170 140,250 Q155,245 158,195 Q148,155 162,120 Z', label: 'Wavy Hair Left', defaultColor: '#FB923C' },
+      { id: 'hair_right', d: 'M250,105 Q290,170 260,250 Q245,245 242,195 Q252,155 238,120 Z', label: 'Wavy Hair Right', defaultColor: '#FB923C' },
+      { id: 'face', d: 'M162,120 Q200,108 238,120 Q244,168 200,192 Q156,168 162,120 Z', label: 'Mermaid Face', defaultColor: '#FEF3C7' },
+      { id: 'arm_l', d: 'M155,220 Q140,240 155,255 Q168,250 165,225 Z', label: 'Left Arm', defaultColor: '#FEF3C7' },
+      { id: 'arm_r', d: 'M245,220 Q260,240 245,255 Q232,250 235,225 Z', label: 'Right Arm', defaultColor: '#FEF3C7' },
+      { id: 'shell_held', d: 'M160,200 Q200,175 240,200 Q245,240 200,260 Q155,240 160,200 Z', label: 'Held Shell', defaultColor: '#FBCFE8' },
+      { id: 'waist', d: 'M175,258 L170,285 L230,285 L225,258 Z', label: 'Waist', defaultColor: '#FEF3C7' },
+      { id: 'tail_top', d: 'M170,285 Q150,325 185,360 Q212,360 230,285 Z', label: 'Tail Body', defaultColor: '#34D399' },
+      { id: 'fin_l', d: 'M185,360 Q142,382 160,400 Q192,390 198,368 Z', label: 'Tail Fin Left', defaultColor: '#2DD4BF' },
+      { id: 'fin_r', d: 'M198,368 Q205,390 238,400 Q255,382 212,360 Z', label: 'Tail Fin Right', defaultColor: '#2DD4BF' },
+      { id: 'jelly_cap', d: 'M65,150 Q45,120 75,105 Q105,120 85,150 Z', label: 'Jellyfish Friend', defaultColor: '#F0ABFC' },
+      { id: 'starfish', d: 'M320,300 L326,280 L342,280 L328,266 L333,248 L320,260 L307,248 L312,266 L298,280 L314,280 Z', label: 'Starfish Friend', defaultColor: '#FB923C' },
+      { id: 'oyster_bottom', d: 'M300,355 Q340,335 380,360 Q345,390 300,375 Z', label: 'Oyster Shell', defaultColor: '#E9D5FF' },
+      { id: 'oyster_top', d: 'M305,355 Q340,330 375,358 Q340,345 305,355 Z', label: 'Oyster Shell Top', defaultColor: '#C4B5FD' },
+      { id: 'pearl', d: 'M330,352 A12,12 0 1,0 354,352 A12,12 0 1,0 330,352', label: 'Pearl', defaultColor: '#FFFFFF' },
+    ],
+    overlaySvg: `
+      <!-- Face -->
+      <ellipse cx="185" cy="152" rx="7" ry="9" fill="#1F2937" />
+      <circle cx="183" cy="149" r="2.5" fill="#FFFFFF" />
+      <circle cx="187" cy="155" r="1.5" fill="#FFFFFF" />
+      <path d="M176,144 Q185,140 193,144" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+
+      <ellipse cx="215" cy="152" rx="7" ry="9" fill="#1F2937" />
+      <circle cx="213" cy="149" r="2.5" fill="#FFFFFF" />
+      <circle cx="217" cy="155" r="1.5" fill="#FFFFFF" />
+      <path d="M207,144 Q215,140 224,144" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+
+      <path d="M193,172 Q200,178 207,172" stroke="#E11D48" stroke-width="2.5" fill="none" stroke-linecap="round" />
+      <circle cx="174" cy="165" r="5" fill="#FDA4AF" opacity="0.6" />
+      <circle cx="226" cy="165" r="5" fill="#FDA4AF" opacity="0.6" />
+
+      <!-- Shell ridges -->
+      <path d="M175,205 Q200,190 225,205" stroke="#1F2937" stroke-width="2" fill="none" />
+      <path d="M180,230 Q200,215 220,230" stroke="#1F2937" stroke-width="2" fill="none" />
+
+      <!-- Jellyfish face + tentacles -->
+      <circle cx="60" cy="128" r="2" fill="#1F2937" />
+      <circle cx="72" cy="128" r="2" fill="#1F2937" />
+      <path d="M60,138 Q66,142 72,138" stroke="#1F2937" stroke-width="1.5" fill="none" />
+      <path d="M55,150 Q62,165 52,180 Q46,190 52,198" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path d="M65,150 Q58,168 68,182 Q74,192 66,202" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path d="M75,150 Q82,165 74,180 Q68,190 76,198" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+
+      <!-- Pearl shine -->
+      <circle cx="335" cy="348" r="2.5" fill="#FFFFFF" />
+
+      <!-- Tail scales -->
+      <path d="M182,300 Q192,308 202,300" stroke="#1F2937" stroke-width="2" fill="none" />
+      <path d="M186,316 Q196,324 206,316" stroke="#1F2937" stroke-width="2" fill="none" />
+
+      <!-- Bubbles -->
+      <circle cx="330" cy="90" r="7" fill="none" stroke="#1F2937" stroke-width="2" />
+      <circle cx="345" cy="65" r="4" fill="none" stroke="#1F2937" stroke-width="2" />
+      <circle cx="40" cy="60" r="6" fill="none" stroke="#1F2937" stroke-width="2" />
+    `,
+  },
+
+  // ================= 8. PRINCESS & FOREST FRIENDS =================
+  {
+    id: 'princess_forest_friends',
+    title: 'Princess & Forest Friends',
+    emoji: '🐿️',
+    category: 'Princess',
+    regions: [
+      { id: 'bg_sky', d: 'M0,0 L400,0 L400,400 L0,400 Z', label: 'Sky Backdrop', defaultColor: '#FDE68A' },
+      { id: 'ground', d: 'M0,360 Q200,340 400,360 L400,400 L0,400 Z', label: 'Meadow Ground', defaultColor: '#86EFAC' },
+      { id: 'star_1', d: 'M75,235 L80,220 L95,220 L83,211 L88,196 L75,206 L62,196 L67,211 L55,220 L70,220 Z', label: 'Star', defaultColor: '#FFFFFF' },
+      { id: 'star_2', d: 'M135,190 L139,178 L151,178 L141,171 L145,159 L135,167 L125,159 L129,171 L119,178 L131,178 Z', label: 'Star', defaultColor: '#FFFFFF' },
+      { id: 'star_3', d: 'M60,300 L64,288 L76,288 L66,281 L70,269 L60,277 L50,269 L54,281 L44,288 L56,288 Z', label: 'Star', defaultColor: '#FFFFFF' },
+      { id: 'star_4', d: 'M115,320 L118,311 L127,311 L120,306 L123,297 L115,303 L107,297 L110,306 L103,311 L112,311 Z', label: 'Star', defaultColor: '#FFFFFF' },
+      { id: 'bird_body', d: 'M60,110 Q35,95 50,75 Q75,65 95,85 Q90,105 60,110 Z', label: 'Little Bird', defaultColor: '#FB923C' },
+      { id: 'bird_wing', d: 'M50,80 Q20,55 35,35 Q65,45 55,80 Z', label: 'Bird Wing', defaultColor: '#FDBA74' },
+      { id: 'hair_top', d: 'M255,90 Q300,55 345,90 Q355,120 335,135 Q290,110 255,110 Q245,100 255,90 Z', label: 'Big Hair Pouf', defaultColor: '#FB923C' },
+      { id: 'hair_side', d: 'M330,130 Q360,180 340,240 Q320,235 318,190 Q322,155 330,130 Z', label: 'Flowing Hair', defaultColor: '#FB923C' },
+      { id: 'face', d: 'M258,140 Q295,128 330,140 Q334,180 295,200 Q256,180 258,140 Z', label: 'Princess Face', defaultColor: '#FEF3C7' },
+      { id: 'wave_arm', d: 'M222,208 Q210,190 222,172 Q238,165 248,180 Q250,198 235,210 Q228,212 222,208 Z', label: 'Waving Arm', defaultColor: '#FEF3C7' },
+      { id: 'sleeve', d: 'M235,205 Q205,200 210,230 Q225,245 245,228 Z', label: 'Puff Sleeve', defaultColor: '#93C5FD' },
+      { id: 'bodice', d: 'M262,205 L255,255 Q295,265 330,255 L325,205 Q295,218 262,205 Z', label: 'Dress Bodice', defaultColor: '#60A5FA' },
+      { id: 'skirt_main', d: 'M255,255 Q210,300 220,355 Q295,375 375,355 Q380,300 330,255 Q295,265 255,255 Z', label: 'Ballgown Skirt', defaultColor: '#93C5FD' },
+      { id: 'skirt_hem', d: 'M220,355 Q295,375 375,355 L378,368 Q295,388 218,368 Z', label: 'Hem Ruffle', defaultColor: '#FEF3C7' },
+      { id: 'squirrel_tail', d: 'M40,330 Q0,300 20,250 Q60,240 65,290 Q75,320 40,330 Z', label: 'Squirrel Tail', defaultColor: '#F97316' },
+      { id: 'squirrel_body', d: 'M55,340 Q40,370 70,385 Q100,390 110,365 Q100,335 55,340 Z', label: 'Squirrel Body', defaultColor: '#FB923C' },
+      { id: 'squirrel_ear', d: 'M95,335 L88,315 L108,325 Z', label: 'Squirrel Ear', defaultColor: '#FB923C' },
+    ],
+    overlaySvg: `
+      <!-- Princess face -->
+      <ellipse cx="283" cy="160" rx="7" ry="9" fill="#1F2937" />
+      <circle cx="281" cy="157" r="2.5" fill="#FFFFFF" />
+      <path d="M274,152 Q283,148 291,152" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+
+      <ellipse cx="313" cy="160" rx="7" ry="9" fill="#1F2937" />
+      <circle cx="311" cy="157" r="2.5" fill="#FFFFFF" />
+      <path d="M305,152 Q313,148 322,152" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+
+      <path d="M290,180 Q297,186 304,180" stroke="#E11D48" stroke-width="2.5" fill="none" stroke-linecap="round" />
+      <circle cx="272" cy="173" r="5" fill="#FDA4AF" opacity="0.6" />
+      <circle cx="324" cy="173" r="5" fill="#FDA4AF" opacity="0.6" />
+
+      <!-- Hair strand lines -->
+      <path d="M280,100 Q290,118 285,132" stroke="#1F2937" stroke-width="2" fill="none" />
+      <path d="M320,100 Q310,118 315,132" stroke="#1F2937" stroke-width="2" fill="none" />
+
+      <!-- Bird face -->
+      <circle cx="80" cy="85" r="2" fill="#1F2937" />
+      <path d="M95,88 L108,92 L95,96 Z" fill="#FB923C" />
+
+      <!-- Squirrel face -->
+      <circle cx="88" cy="355" r="2.5" fill="#1F2937" />
+      <circle cx="70" cy="365" r="2" fill="#1F2937" />
+      <path d="M75,372 Q82,377 90,372" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+
+      <!-- Sparkle dots on stars -->
+      <circle cx="75" cy="220" r="1.5" fill="#FDE68A" />
+      <circle cx="135" cy="175" r="1.5" fill="#FDE68A" />
+
+      <!-- Skirt fold lines -->
+      <path d="M245,270 Q260,320 250,365" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path d="M340,270 Q330,320 345,365" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+    `,
+  },
+
+  // ================= 9. ICE PRINCESS & SWEET TREAT =================
+  {
+    id: 'ice_princess_treat',
+    title: 'Ice Princess & Sweet Treat',
+    emoji: '❄️',
+    category: 'Fairytale',
+    regions: [
+      { id: 'bg_ice', d: 'M0,0 L400,0 L400,400 L0,400 Z', label: 'Frosty Sky', defaultColor: '#BFDBFE' },
+      { id: 'heart_deco', d: 'M55,55 C40,35 10,45 10,70 C10,95 55,120 55,120 C55,120 100,95 100,70 C100,45 70,35 55,55 Z', label: 'Floating Heart', defaultColor: '#F472B6' },
+      { id: 'snow_1', d: 'M330,60 L336,45 L344,45 L338,55 L352,50 L354,58 L340,60 L352,68 L346,75 L336,63 L330,78 L322,75 L330,63 L316,68 L314,58 L328,58 Z', label: 'Snowflake', defaultColor: '#FFFFFF' },
+      { id: 'snow_2', d: 'M50,220 L55,208 L62,208 L57,216 L69,212 L71,219 L59,221 L69,228 L64,234 L56,224 L51,236 L45,234 L51,224 L40,228 L38,220 L49,220 Z', label: 'Snowflake', defaultColor: '#FFFFFF' },
+      { id: 'snow_3', d: 'M60,320 L64,310 L70,310 L66,317 L77,314 L79,320 L69,322 L77,328 L73,333 L66,325 L62,335 L57,333 L62,325 L53,328 L51,321 L61,321 Z', label: 'Snowflake', defaultColor: '#FFFFFF' },
+      { id: 'hair', d: 'M155,90 Q125,70 150,50 Q190,30 235,55 Q260,80 235,105 Q290,115 300,180 Q285,240 250,250 Q255,180 225,135 Q195,105 155,90 Z', label: 'Icy Hair', defaultColor: '#F0F9FF' },
+      { id: 'face', d: 'M165,115 Q200,102 235,115 Q240,160 200,182 Q160,160 165,115 Z', label: 'Face', defaultColor: '#FEF3C7' },
+      { id: 'heart_hands', d: 'M182,200 Q175,185 190,182 Q200,190 200,190 Q200,190 210,182 Q225,185 218,200 Q200,215 182,200 Z', label: 'Heart Hands', defaultColor: '#FEF3C7' },
+      { id: 'bodice', d: 'M175,205 L168,255 Q200,265 232,255 L225,205 Q200,220 175,205 Z', label: 'Icy Bodice', defaultColor: '#93C5FD' },
+      { id: 'skirt', d: 'M168,255 Q140,300 150,360 Q200,378 250,360 Q260,300 232,255 Q200,268 168,255 Z', label: 'Ice Gown Skirt', defaultColor: '#60A5FA' },
+      { id: 'skirt_hem', d: 'M150,360 Q200,378 250,360 L253,372 Q200,392 147,372 Z', label: 'Hem Sparkle', defaultColor: '#DBEAFE' },
+      { id: 'cone', d: 'M300,290 L340,290 L322,360 Z', label: 'Waffle Cone', defaultColor: '#FB923C' },
+      { id: 'scoop', d: 'M290,290 Q292,255 320,252 Q348,255 350,290 Q320,300 290,290 Z', label: 'Ice Cream Scoop', defaultColor: '#FBCFE8' },
+    ],
+    overlaySvg: `
+      <!-- Face -->
+      <ellipse cx="185" cy="142" rx="7" ry="9" fill="#1F2937" />
+      <circle cx="183" cy="139" r="2.5" fill="#FFFFFF" />
+      <circle cx="187" cy="145" r="1.5" fill="#FFFFFF" />
+      <path d="M176,134 Q185,130 193,134" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+
+      <ellipse cx="215" cy="142" rx="7" ry="9" fill="#1F2937" />
+      <circle cx="213" cy="139" r="2.5" fill="#FFFFFF" />
+      <circle cx="217" cy="145" r="1.5" fill="#FFFFFF" />
+      <path d="M207,134 Q215,130 224,134" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+
+      <path d="M193,162 Q200,168 207,162" stroke="#E11D48" stroke-width="2.5" fill="none" stroke-linecap="round" />
+      <circle cx="174" cy="155" r="5" fill="#FDA4AF" opacity="0.6" />
+      <circle cx="226" cy="155" r="5" fill="#FDA4AF" opacity="0.6" />
+
+      <!-- Hair strand lines -->
+      <path d="M165,70 Q180,90 172,110" stroke="#1F2937" stroke-width="2" fill="none" />
+      <path d="M270,150 Q280,190 265,225" stroke="#1F2937" stroke-width="2" fill="none" />
+
+      <!-- Heart hands shine -->
+      <path d="M190,192 Q200,198 210,192" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+
+      <!-- Snowflake center dots -->
+      <circle cx="338" cy="58" r="2" fill="#93C5FD" />
+      <circle cx="56" cy="220" r="2" fill="#93C5FD" />
+      <circle cx="66" cy="320" r="2" fill="#93C5FD" />
+
+      <!-- Floating heart shine -->
+      <path d="M30,65 Q40,58 48,65" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8" />
+
+      <!-- Cone waffle grid -->
+      <line x1="305" y1="305" x2="325" y2="340" stroke="#1F2937" stroke-width="1.5" />
+      <line x1="313" y1="295" x2="330" y2="325" stroke="#1F2937" stroke-width="1.5" />
+      <line x1="308" y1="320" x2="335" y2="308" stroke="#1F2937" stroke-width="1.5" />
+      <line x1="303" y1="300" x2="336" y2="290" stroke="#1F2937" stroke-width="1.5" />
+
+      <!-- Scoop swirl -->
+      <path d="M300,275 Q320,262 340,275" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+    `,
+  },
+
+  // ================= 10. CROWNED UNICORN =================
+  {
+    id: 'crowned_unicorn',
+    title: 'Crowned Unicorn',
+    emoji: '🦄',
+    category: 'Fairytale',
+    regions: [
+      { id: 'sky_soft', d: 'M0,0 L400,0 L400,320 L0,320 Z', label: 'Soft Sky', defaultColor: '#FCE7F3' },
+      { id: 'meadow', d: 'M0,310 Q200,280 400,310 L400,400 L0,400 Z', label: 'Meadow', defaultColor: '#BBF7D0' },
+      { id: 'uni_body', d: 'M140,215 Q112,265 180,280 Q260,280 288,228 Q262,198 200,198 Z', label: 'Unicorn Body', defaultColor: '#FFFFFF' },
+      { id: 'uni_head_neck', d: 'M140,215 L112,148 Q98,108 140,108 Q178,108 188,152 L198,210 Z', label: 'Head & Neck', defaultColor: '#FFFFFF' },
+      { id: 'uni_snout', d: 'M102,130 Q76,148 96,168 Q120,168 130,148 Z', label: 'Snout', defaultColor: '#FEF3C7' },
+      { id: 'uni_horn', d: 'M132,108 L152,32 L150,103 Z', label: 'Golden Horn', defaultColor: '#FACC15' },
+      { id: 'uni_ear', d: 'M158,108 L173,72 L170,113 Z', label: 'Ear', defaultColor: '#FFFFFF' },
+      { id: 'crown', d: 'M118,95 L128,65 L142,82 L158,60 L174,82 L186,68 L192,98 Z', label: 'Royal Crown', defaultColor: '#FACC15' },
+      { id: 'crown_gem', d: 'M152,80 L158,72 L164,80 L158,88 Z', label: 'Crown Jewel', defaultColor: '#F43F5E' },
+      { id: 'mane_1', d: 'M162,120 Q210,112 195,148 Q178,138 168,128 Z', label: 'Mane Lock 1', defaultColor: '#F472B6' },
+      { id: 'mane_2', d: 'M172,145 Q225,148 205,185 Q190,168 178,153 Z', label: 'Mane Lock 2', defaultColor: '#C084FC' },
+      { id: 'mane_3', d: 'M182,180 Q235,185 215,220 Q198,205 188,190 Z', label: 'Mane Lock 3', defaultColor: '#93C5FD' },
+      { id: 'mane_bow_l', d: 'M225,145 L205,132 L205,158 Z', label: 'Mane Bow Left', defaultColor: '#EC4899' },
+      { id: 'mane_bow_r', d: 'M225,145 L245,132 L245,158 Z', label: 'Mane Bow Right', defaultColor: '#EC4899' },
+      { id: 'tail_top', d: 'M282,225 Q360,208 350,272 Q312,272 285,240 Z', label: 'Tail Top', defaultColor: '#F472B6' },
+      { id: 'tail_bot', d: 'M285,240 Q345,272 335,308 Q292,302 278,255 Z', label: 'Tail Bottom', defaultColor: '#C084FC' },
+      { id: 'leg_f', d: 'M138,250 L132,325 L158,325 L168,260 Z', label: 'Front Leg', defaultColor: '#FFFFFF' },
+      { id: 'leg_b', d: 'M252,250 L252,325 L278,325 L272,260 Z', label: 'Back Leg', defaultColor: '#FFFFFF' },
+      { id: 'hoof_f', d: 'M132,310 L158,310 L158,325 L132,325 Z', label: 'Front Hoof', defaultColor: '#FACC15' },
+      { id: 'hoof_b', d: 'M252,310 L278,310 L278,325 L252,325 Z', label: 'Back Hoof', defaultColor: '#FACC15' },
+      { id: 'leg_bow_f', d: 'M132,290 L158,290 L158,300 L132,300 Z', label: 'Leg Ribbon Front', defaultColor: '#F472B6' },
+      { id: 'leg_bow_b', d: 'M252,290 L278,290 L278,300 L252,300 Z', label: 'Leg Ribbon Back', defaultColor: '#F472B6' },
+      { id: 'heart_1', d: 'M330,80 C322,68 305,74 305,88 C305,102 330,118 330,118 C330,118 355,102 355,88 C355,74 338,68 330,80 Z', label: 'Heart', defaultColor: '#F9A8D4' },
+    ],
+    overlaySvg: `
+      <!-- Eye -->
+      <ellipse cx="132" cy="132" rx="9" ry="12" fill="#1F2937" />
+      <circle cx="130" cy="128" r="3.5" fill="#FFFFFF" />
+      <circle cx="135" cy="136" r="1.5" fill="#FFFFFF" />
+      <path d="M122,122 Q132,117 142,122" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+      <line x1="122" y1="122" x2="118" y2="117" stroke="#1F2937" stroke-width="2" stroke-linecap="round" />
+
+      <!-- Nostril & smile -->
+      <circle cx="102" cy="148" r="2.5" fill="#E11D48" />
+      <path d="M106,155 Q114,160 120,154" stroke="#E11D48" stroke-width="2" fill="none" stroke-linecap="round" />
+      <circle cx="125" cy="148" r="6" fill="#FDA4AF" opacity="0.6" />
+
+      <!-- Horn ridges -->
+      <line x1="140" y1="85" x2="151" y2="90" stroke="#1F2937" stroke-width="2" stroke-linecap="round" />
+      <line x1="144" y1="65" x2="153" y2="70" stroke="#1F2937" stroke-width="2" stroke-linecap="round" />
+      <line x1="148" y1="48" x2="155" y2="52" stroke="#1F2937" stroke-width="2" stroke-linecap="round" />
+
+      <!-- Mane strand lines -->
+      <path d="M180,130 Q195,138 185,150" stroke="#1F2937" stroke-width="1.5" fill="none" />
+      <path d="M190,160 Q205,168 195,180" stroke="#1F2937" stroke-width="1.5" fill="none" />
+
+      <!-- Meadow grass tufts -->
+      <path d="M40,340 Q45,325 50,340" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path d="M180,355 Q185,340 190,355" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path d="M340,345 Q345,330 350,345" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+
+      <!-- Heart shine -->
+      <path d="M312,80 Q320,74 326,80" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8" />
+    `,
+  },
+
+  // ================= 11. PRINCESS & HER UNICORN KITTEN =================
+  {
+    id: 'princess_unicorn_kitten',
+    title: 'Princess & Unicorn Kitten',
+    emoji: '🐱',
+    category: 'Pet',
+    regions: [
+      { id: 'bg_lavender', d: 'M0,0 L400,0 L400,400 L0,400 Z', label: 'Lavender Sky', defaultColor: '#EDE9FE' },
+      { id: 'ground', d: 'M0,370 L400,370 L400,400 L0,400 Z', label: 'Ground', defaultColor: '#DDD6FE' },
+      { id: 'heart_big', d: 'M340,55 C328,38 300,48 300,68 C300,88 340,115 340,115 C340,115 380,88 380,68 C380,48 352,38 340,55 Z', label: 'Big Heart', defaultColor: '#F9A8D4' },
+      { id: 'heart_med', d: 'M330,150 C322,138 305,145 305,158 C305,171 330,190 330,190 C330,190 355,171 355,158 C355,145 338,138 330,150 Z', label: 'Medium Heart', defaultColor: '#F472B6' },
+      { id: 'heart_small', d: 'M340,215 C335,207 323,211 323,220 C323,229 340,240 340,240 C340,240 357,229 357,220 C357,211 345,207 340,215 Z', label: 'Small Heart', defaultColor: '#FBCFE8' },
+      { id: 'crown', d: 'M105,80 L114,55 L128,70 L145,52 L162,70 L176,55 L185,80 Z', label: 'Princess Crown', defaultColor: '#FACC15' },
+      { id: 'crown_gem', d: 'M138,68 L145,60 L152,68 L145,76 Z', label: 'Crown Jewel', defaultColor: '#38BDF8' },
+      { id: 'hair', d: 'M95,95 Q65,150 90,230 Q115,235 118,190 Q108,145 128,105 Q170,95 195,110 Q205,150 185,225 Q205,232 215,195 Q225,140 195,95 Q160,75 145,80 Q120,78 95,95 Z', label: 'Princess Hair', defaultColor: '#78350F' },
+      { id: 'face', d: 'M108,110 Q145,98 182,110 Q188,158 145,182 Q102,158 108,110 Z', label: 'Face', defaultColor: '#FEF3C7' },
+      { id: 'arm_raised', d: 'M175,145 Q200,120 195,100 Q180,95 172,118 Q168,135 175,145 Z', label: 'Raised Arm', defaultColor: '#FEF3C7' },
+      { id: 'sleeve', d: 'M172,138 Q198,132 198,158 Q182,172 165,158 Z', label: 'Puff Sleeve', defaultColor: '#F9A8D4' },
+      { id: 'bodice', d: 'M112,200 L105,250 Q145,262 182,250 L175,200 Q145,215 112,200 Z', label: 'Bodice', defaultColor: '#F472B6' },
+      { id: 'skirt', d: 'M105,250 Q65,295 78,350 Q145,368 210,350 Q222,295 175,250 Q145,262 105,250 Z', label: 'Skirt', defaultColor: '#C084FC' },
+      { id: 'skirt_hem', d: 'M78,350 Q145,368 210,350 L213,362 Q145,382 75,362 Z', label: 'Hem', defaultColor: '#FEF3C7' },
+      { id: 'kitten_body', d: 'M245,290 Q230,330 265,350 Q300,355 320,335 Q325,300 290,285 Z', label: 'Unicorn Kitten Body', defaultColor: '#FFFFFF' },
+      { id: 'kitten_head', d: 'M240,255 Q228,290 260,305 Q290,315 315,300 Q330,270 305,248 Q270,235 240,255 Z', label: 'Kitten Head', defaultColor: '#FFFFFF' },
+      { id: 'kitten_ear_l', d: 'M250,235 L240,212 L265,228 Z', label: 'Kitten Ear Left', defaultColor: '#FFFFFF' },
+      { id: 'kitten_ear_r', d: 'M296,232 L308,208 L318,232 Z', label: 'Kitten Ear Right', defaultColor: '#FFFFFF' },
+      { id: 'horn', d: 'M270,220 L280,175 L286,218 Z', label: 'Unicorn Horn', defaultColor: '#FACC15' },
+      { id: 'collar', d: 'M248,295 Q278,305 308,295 L305,305 Q278,315 251,305 Z', label: 'Star Collar', defaultColor: '#38BDF8' },
+      { id: 'collar_star', d: 'M278,292 L281,285 L288,285 L282,281 L284,274 L278,278 L272,274 L274,281 L268,285 L275,285 Z', label: 'Collar Star', defaultColor: '#FACC15' },
+      { id: 'kitten_tail', d: 'M315,330 Q355,320 350,280 Q335,280 330,310 Q325,325 315,330 Z', label: 'Kitten Tail', defaultColor: '#F9A8D4' },
+    ],
+    overlaySvg: `
+      <!-- Princess face -->
+      <ellipse cx="133" cy="132" rx="7" ry="9" fill="#1F2937" />
+      <circle cx="131" cy="129" r="2.5" fill="#FFFFFF" />
+      <path d="M124,124 Q133,120 141,124" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+
+      <ellipse cx="160" cy="132" rx="7" ry="9" fill="#1F2937" />
+      <circle cx="158" cy="129" r="2.5" fill="#FFFFFF" />
+      <path d="M152,124 Q160,120 169,124" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+
+      <path d="M138,152 Q145,158 152,152" stroke="#E11D48" stroke-width="2.5" fill="none" stroke-linecap="round" />
+      <circle cx="120" cy="145" r="5" fill="#FDA4AF" opacity="0.6" />
+      <circle cx="172" cy="145" r="5" fill="#FDA4AF" opacity="0.6" />
+
+      <!-- Hair strand lines -->
+      <path d="M100,110 Q90,160 105,215" stroke="#1F2937" stroke-width="2" fill="none" />
+      <path d="M190,110 Q200,160 185,215" stroke="#1F2937" stroke-width="2" fill="none" />
+
+      <!-- Kitten face -->
+      <ellipse cx="262" cy="270" rx="6" ry="7" fill="#1F2937" />
+      <circle cx="260" cy="268" r="2" fill="#FFFFFF" />
+      <ellipse cx="288" cy="270" rx="6" ry="7" fill="#1F2937" />
+      <circle cx="286" cy="268" r="2" fill="#FFFFFF" />
+      <polygon points="270,280 280,280 275,285" fill="#F472B6" />
+      <path d="M275,285 Q275,289 275,289" stroke="#1F2937" stroke-width="1.5" />
+      <path d="M270,289 Q275,293 280,289" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+      <line x1="255" y1="278" x2="235" y2="274" stroke="#1F2937" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="255" y1="284" x2="235" y2="286" stroke="#1F2937" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="295" y1="278" x2="315" y2="274" stroke="#1F2937" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="295" y1="284" x2="315" y2="286" stroke="#1F2937" stroke-width="1.5" stroke-linecap="round" />
+
+      <!-- Horn ridges -->
+      <line x1="274" y1="205" x2="282" y2="207" stroke="#1F2937" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="277" y1="192" x2="283" y2="194" stroke="#1F2937" stroke-width="1.5" stroke-linecap="round" />
+
+      <!-- Heart shine accents -->
+      <path d="M312,60 Q320,54 326,60" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8" />
+
+      <!-- Skirt folds -->
+      <path d="M100,270 Q90,310 100,345" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path d="M190,270 Q200,310 190,345" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round" />
+    `,
+  },
 ];

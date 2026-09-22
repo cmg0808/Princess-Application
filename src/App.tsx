@@ -26,7 +26,6 @@ const CrownDecoratorGame = lazy(() => import('./components/CrownDecoratorGame').
 const TeaPartyGame = lazy(() => import('./components/TeaPartyGame').then((m) => ({ default: m.TeaPartyGame })));
 const PetSpaGame = lazy(() => import('./components/PetSpaGame').then((m) => ({ default: m.PetSpaGame })));
 const MagicWandGame = lazy(() => import('./components/MagicWandGame').then((m) => ({ default: m.MagicWandGame })));
-const ShapeSorterGame = lazy(() => import('./components/ShapeSorterGame').then((m) => ({ default: m.ShapeSorterGame })));
 const RoyalGallery = lazy(() => import('./components/RoyalGallery').then((m) => ({ default: m.RoyalGallery })));
 
 // Friendly loading state shown for the brief moment a game chunk is fetched.
@@ -237,10 +236,6 @@ export default function App() {
 
                     {currentMode === 'magicwand' && (
                       <MagicWandGame onReward={handleReward} />
-                    )}
-
-                    {currentMode === 'shapesorter' && (
-                      <ShapeSorterGame onReward={handleReward} />
                     )}
 
                     {currentMode === 'parents' && (

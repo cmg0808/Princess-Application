@@ -98,14 +98,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       icon: <img src="art/icon-magicwand.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
     },
     {
-      mode: 'shapesorter',
-      label: 'Shapes',
-      bgClass: 'bg-[#FEF3D6]', // lemon cream
-      shapeClass: 'rounded-[60%_40%_50%_50%_/_45%_55%_45%_55%]',
-      animDelay: '0.52s',
-      icon: <img src="art/icon-shapes.png" alt="" className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs" draggable={false} />,
-    },
-    {
       mode: 'royalball',
       label: 'Dance Ball',
       bgClass: 'bg-[#F3E8FF]', // lilac dream
@@ -232,7 +224,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div className="relative w-fit mx-auto">
           <div className="glass-strong glow-lavender rounded-[42px] px-8 sm:px-12 pt-12 pb-5 sm:pt-14 sm:pb-6">
             <h1 className="font-script text-5xl sm:text-7xl text-[#FF6FA5] m-0 leading-none">
-              Sparkle Town
+              Princess Kingdom
             </h1>
             <p className="font-display italic font-semibold text-[#6E5FA6] text-base sm:text-lg mt-2">
               Pick something fun!
@@ -256,7 +248,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             whileTap={{ scale: 0.92 }}
             transition={{ type: 'spring', stiffness: 400, damping: 15 }}
             className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-linear-to-br from-[#FFD6E8] via-[#FFF1C2] to-[#E3D6FF] flex items-center justify-center glow-pink animate-float-hero cursor-pointer border-4 border-white"
-            title="Sparkle Town!"
+            title="Princess Kingdom!"
           >
             <CartoonHeroCrown className="w-16 h-16 sm:w-20 sm:h-20" />
           </motion.button>

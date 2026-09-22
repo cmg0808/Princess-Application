@@ -22,7 +22,6 @@ const MODE_TITLES: Partial<Record<GameMode, string>> = {
   teaparty: 'Tea Party',
   petspa: 'Pet Spa',
   magicwand: 'Magic Wand',
-  shapesorter: 'Shapes',
   royalball: 'Dance Ball',
   storybook: 'Story',
   crowndecorator: 'Crowns',

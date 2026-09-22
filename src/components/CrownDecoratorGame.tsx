@@ -87,6 +87,14 @@ const GEM_PALETTE: GemPaletteItem[] = [
 
 const spring = { type: 'spring' as const, stiffness: 360, damping: 20 };
 
+type OptionTab = 'style' | 'metal' | 'gems';
+
+const OPTION_TABS: { id: OptionTab; label: string }[] = [
+  { id: 'style', label: 'Style' },
+  { id: 'metal', label: 'Metal' },
+  { id: 'gems', label: 'Gems' },
+];
+
 export const CrownDecoratorGame: React.FC<CrownDecoratorGameProps> = ({ onReward }) => {
   const [selectedBase, setSelectedBase] = useState<CrownBaseOption>(CROWN_BASES[0]);
   const [selectedMetal, setSelectedMetal] = useState<CrownMetalOption>(CROWN_METALS[0]);
@@ -95,6 +103,7 @@ export const CrownDecoratorGame: React.FC<CrownDecoratorGameProps> = ({ onReward
   const [isWearingOnPrincess, setIsWearingOnPrincess] = useState(false);
   const [sparkleActive, setSparkleActive] = useState(false);
   const [showPhotoFlash, setShowPhotoFlash] = useState(false);
+  const [activeTab, setActiveTab] = useState<OptionTab>('gems');
 
   const crownCanvasRef = useRef<HTMLDivElement | null>(null);
 
@@ -235,13 +244,118 @@ export const CrownDecoratorGame: React.FC<CrownDecoratorGameProps> = ({ onReward
         </div>
       </motion.div>
 
-      {/* Main Crown Decorating Stage Canvas */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ ...spring, delay: 0.05 }}
-        className="relative w-full max-w-2xl h-[340px] sm:h-[380px] rounded-[40px] border-4 border-white/70 glow-pink overflow-hidden bg-linear-to-b from-pink-100 via-purple-50 to-pink-200 flex flex-col items-center justify-center p-4"
-      >
+      {/* Options Rail (left) + Crown Decorating Stage (right) */}
+      <div className="w-full max-w-3xl flex items-stretch gap-2.5 sm:gap-3">
+        {/* Options Rail */}
+        <motion.div
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ ...spring, delay: 0.05 }}
+          className="glass-strong glow-lavender rounded-[28px] p-2 sm:p-2.5 flex flex-col gap-2 shrink-0 w-[108px] sm:w-[144px] h-[340px] sm:h-[380px]"
+        >
+          {/* Category Tabs */}
+          <div className="flex items-center gap-1 shrink-0">
+            {OPTION_TABS.map((tab) => (
+              <motion.button
+                key={tab.id}
+                id={`btn-crown-tab-${tab.id}`}
+                onClick={() => {
+                  playSound.tap();
+                  setActiveTab(tab.id);
+                }}
+                whileTap={{ scale: 0.92 }}
+                className={`flex-1 py-1 rounded-full text-[9px] sm:text-[10px] font-black cursor-pointer ${
+                  activeTab === tab.id ? 'bg-pink-500 text-white glow-pink' : 'glass text-pink-700'
+                }`}
+              >
+                {tab.label}
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div className="flex-1 overflow-y-auto scrollbar-none">
+            {activeTab === 'style' && (
+              <div className="flex flex-col gap-1.5">
+                {CROWN_BASES.map((base) => (
+                  <motion.button
+                    key={base.id}
+                    id={`btn-base-${base.id}`}
+                    onClick={() => {
+                      playSound.tap();
+                      setSelectedBase(base);
+                    }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.93 }}
+                    className={`flex items-center gap-1.5 px-1.5 py-1.5 rounded-2xl cursor-pointer w-full text-left ${
+                      selectedBase.id === base.id ? 'glass-strong glow-gold ring-2 ring-pink-300' : 'glass hover:glow-pink'
+                    }`}
+                  >
+                    <img src={base.src} alt="" className="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0" style={{ filter: selectedMetal.filterCss }} />
+                    <span className="text-[9px] sm:text-[10px] font-extrabold text-[#4A3B5C] truncate">{base.name}</span>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'metal' && (
+              <div className="flex flex-col gap-1.5">
+                {CROWN_METALS.map((metal) => (
+                  <motion.button
+                    key={metal.id}
+                    id={`btn-metal-${metal.id}`}
+                    onClick={() => {
+                      playSound.chime();
+                      setSelectedMetal(metal);
+                    }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.92 }}
+                    className={`flex items-center gap-1.5 px-1.5 py-1.5 rounded-2xl cursor-pointer w-full text-left bg-linear-to-r ${metal.gradient} ${
+                      selectedMetal.id === metal.id ? 'ring-3 ring-pink-400' : ''
+                    }`}
+                  >
+                    <div className="w-5 h-5 rounded-full border border-white shadow-xs shrink-0" style={{ backgroundColor: metal.color }} />
+                    <span className="text-[9px] sm:text-[10px] font-black text-gray-900 truncate">{metal.name}</span>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'gems' && (
+              <div className="grid grid-cols-2 gap-1.5">
+                {GEM_PALETTE.map((gem) => (
+                  <motion.button
+                    key={gem.type}
+                    id={`btn-gem-${gem.type}`}
+                    onClick={() => {
+                      playSound.gemSnap();
+                      setSelectedGemType(gem);
+                    }}
+                    whileHover={{ y: -2, scale: 1.05 }}
+                    whileTap={{ scale: 0.92 }}
+                    className={`flex flex-col items-center justify-center gap-0.5 p-1 sm:p-1.5 rounded-[16px] cursor-pointer ${
+                      selectedGemType.type === gem.type ? 'glass-strong glow-gold ring-2 ring-pink-300' : 'glass hover:glow-pink'
+                    }`}
+                    title={gem.label}
+                  >
+                    <img src={gem.src} alt="" className="w-6 h-6 sm:w-8 sm:h-8 object-contain filter drop-shadow select-none" draggable={false} />
+                    <span className="text-[7px] sm:text-[8px] font-black text-pink-800 truncate w-full text-center">
+                      {gem.label}
+                    </span>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Main Crown Decorating Stage Canvas */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ ...spring, delay: 0.05 }}
+          className="relative flex-1 h-[340px] sm:h-[380px] rounded-[40px] border-4 border-white/70 glow-pink overflow-hidden bg-linear-to-b from-pink-100 via-purple-50 to-pink-200 flex flex-col items-center justify-center p-4"
+        >
         {/* Photo Flash Overlay */}
         {showPhotoFlash && (
           <div className="absolute inset-0 bg-white z-50 animate-out fade-out duration-300 pointer-events-none" />
@@ -356,93 +470,8 @@ export const CrownDecoratorGame: React.FC<CrownDecoratorGameProps> = ({ onReward
             )}
           </div>
         )}
-      </motion.div>
-
-      {/* Chunky Toddler Modular Trays (Bases, Metals, Jewels) */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ ...spring, delay: 0.1 }}
-        className="w-full max-w-2xl glass-strong glow-lavender p-3 rounded-[28px] flex flex-col gap-3"
-      >
-        {/* Tray 1: Crown Base Selector */}
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-black text-pink-700">1. Pick Crown Style:</span>
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-            {CROWN_BASES.map((base) => (
-              <motion.button
-                key={base.id}
-                id={`btn-base-${base.id}`}
-                onClick={() => {
-                  playSound.tap();
-                  setSelectedBase(base);
-                }}
-                whileHover={{ y: -2, scale: 1.03 }}
-                whileTap={{ scale: 0.93 }}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full cursor-pointer shrink-0 font-extrabold text-xs sm:text-sm ${
-                  selectedBase.id === base.id ? 'glass-strong glow-gold ring-2 ring-pink-300' : 'glass hover:glow-pink'
-                }`}
-              >
-                <img src={base.src} alt="" className="w-6 h-6 object-contain" style={{ filter: selectedMetal.filterCss }} />
-                <span className="text-[#4A3B5C]">{base.name}</span>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tray 2: Metal / Color Finish */}
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-black text-pink-700">2. Pick Royal Metal:</span>
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            {CROWN_METALS.map((metal) => (
-              <motion.button
-                key={metal.id}
-                id={`btn-metal-${metal.id}`}
-                onClick={() => {
-                  playSound.chime();
-                  setSelectedMetal(metal);
-                }}
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.92 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer shrink-0 font-extrabold text-xs sm:text-sm bg-linear-to-r ${metal.gradient} ${
-                  selectedMetal.id === metal.id ? 'ring-3 ring-pink-400' : ''
-                }`}
-              >
-                <div className="w-3.5 h-3.5 rounded-full border border-white shadow-xs" style={{ backgroundColor: metal.color }} />
-                <span className="text-xs font-black text-gray-900">{metal.name}</span>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tray 3: Gem & Decorative Jewel Palette */}
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-black text-pink-700">3. Tap a Jewel to Decorate:</span>
-          <div className="grid grid-cols-5 gap-1.5">
-            {GEM_PALETTE.map((gem) => (
-              <motion.button
-                key={gem.type}
-                id={`btn-gem-${gem.type}`}
-                onClick={() => {
-                  playSound.gemSnap();
-                  setSelectedGemType(gem);
-                }}
-                whileHover={{ y: -2, scale: 1.05 }}
-                whileTap={{ scale: 0.92 }}
-                className={`flex flex-col items-center justify-center gap-0.5 p-1.5 rounded-[18px] cursor-pointer ${
-                  selectedGemType.type === gem.type ? 'glass-strong glow-gold ring-2 ring-pink-300' : 'glass hover:glow-pink'
-                }`}
-                title={gem.label}
-              >
-                <img src={gem.src} alt="" className="w-8 h-8 sm:w-9 sm:h-9 object-contain filter drop-shadow select-none" draggable={false} />
-                <span className="text-[9px] font-black text-pink-800 truncate w-full text-center">
-                  {gem.label}
-                </span>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };
